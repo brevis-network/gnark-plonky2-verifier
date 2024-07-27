@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
+	groth162 "github.com/consensys/gnark/backend/groth16/bn254"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
@@ -72,6 +73,10 @@ func TestStepVerifier(t *testing.T) {
 
 		pf, err := groth16.Prove(ccs, pk, circuitWitness, backend.WithProverHashToFieldFunction(sha3.NewLegacyKeccak256()))
 		assert.NoError(err)
+
+		rp := pf.(*groth162.Proof)
+		fmt.Printf("rp.CommitmentPok: %+v", rp.CommitmentPok)
+		fmt.Printf("rp.Commitments: %+v", rp.Commitments)
 
 		err = groth16.Verify(pf, vk, pubW, backend.WithVerifierHashToFieldFunction(sha3.NewLegacyKeccak256()))
 		assert.NoError(err)
