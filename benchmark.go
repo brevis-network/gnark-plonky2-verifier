@@ -9,16 +9,12 @@ import (
 	"time"
 
 	"github.com/consensys/gnark-crypto/ecc"
-	"github.com/consensys/gnark-crypto/kzg"
 	"github.com/consensys/gnark/backend/groth16"
-	"github.com/consensys/gnark/backend/plonk"
 	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/frontend/cs/scs"
 	"github.com/consensys/gnark/profile"
-	"github.com/consensys/gnark/test"
-	"github.com/succinctlabs/gnark-plonky2-verifier/trusted_setup"
 	"github.com/succinctlabs/gnark-plonky2-verifier/types"
 	"github.com/succinctlabs/gnark-plonky2-verifier/variables"
 	"github.com/succinctlabs/gnark-plonky2-verifier/verifier"
@@ -69,7 +65,7 @@ func runBenchmark(plonky2Circuit string, proofSystem string, profileCircuit bool
 	}
 
 	if proofSystem == "plonk" {
-		plonkProof(r1cs, plonky2Circuit, dummy, saveArtifacts)
+		//plonkProof(r1cs, plonky2Circuit, dummy, saveArtifacts)
 	} else if proofSystem == "groth16" {
 		groth16Proof(r1cs, plonky2Circuit, dummy, saveArtifacts)
 	} else {
@@ -77,7 +73,7 @@ func runBenchmark(plonky2Circuit string, proofSystem string, profileCircuit bool
 	}
 }
 
-func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool, saveArtifacts bool) {
+/*func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool, saveArtifacts bool) {
 	var pk plonk.ProvingKey
 	var vk plonk.VerifyingKey
 	var srs kzg.SRS = kzg.NewSRS(ecc.BN254)
@@ -187,7 +183,7 @@ func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool
 	proof.WriteRawTo(&buf)
 	proofBytes := buf.Bytes()
 	fmt.Printf("proofBytes: %v\n", proofBytes)
-}
+}*/
 
 func groth16Proof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool, saveArtifacts bool) {
 	var pk groth16.ProvingKey
