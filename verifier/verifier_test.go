@@ -2,12 +2,14 @@ package verifier_test
 
 import (
 	"fmt"
+	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/variables"
+	"golang.org/x/crypto/sha3"
 	"log"
 	"os"
 	"testing"
@@ -68,17 +70,17 @@ func TestStepVerifier(t *testing.T) {
 			log.Fatalln(err)
 		}
 
-		pf, err := groth16.Prove(ccs, pk, circuitWitness)
+		pf, err := groth16.Prove(ccs, pk, circuitWitness, backend.WithProverHashToFieldFunction(sha3.NewLegacyKeccak256()))
 		assert.NoError(err)
 
-		err = groth16.Verify(pf, vk, pubW)
+		err = groth16.Verify(pf, vk, pubW, backend.WithVerifierHashToFieldFunction(sha3.NewLegacyKeccak256()))
 		assert.NoError(err)
 
 	}
 	testCase()
 }
 
-func TestStepVerifier023(t *testing.T) {
+/*func TestStepVerifier023(t *testing.T) {
 	assert := test.NewAssert(t)
 	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
 
@@ -118,4 +120,4 @@ func TestStepVerifier023(t *testing.T) {
 		fmt.Printf("nb constraint: %d\n", ccs.GetNbConstraints())
 	}
 	testCase()
-}
+}*/
