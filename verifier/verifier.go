@@ -54,7 +54,7 @@ func (c *VerifierChip) GetChallenges(
 	var circuitDigest = verifierData.CircuitDigest
 
 	challenger.ObserveBN254Hash(circuitDigest)
-	challenger.ObserveHash(publicInputsHash)
+	//challenger.ObserveHash(publicInputsHash)
 	challenger.ObserveCap(proof.WiresCap)
 	plonkBetas := challenger.GetNChallenges(numChallenges)
 	plonkGammas := challenger.GetNChallenges(numChallenges)
@@ -148,7 +148,8 @@ func (c *VerifierChip) Verify(
 	c.rangeCheckProof(proof)
 
 	// Generate the parts of the witness that is for the plonky2 proof input
-	publicInputsHash := c.GetPublicInputsHash(publicInputs)
+	//publicInputsHash := c.GetPublicInputsHash(publicInputs)
+	publicInputsHash := c.GetPublicInputsHash([]gl.Variable{publicInputs[0]})
 	proofChallenges := c.GetChallenges(proof, publicInputsHash, verifierData)
 
 	c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)

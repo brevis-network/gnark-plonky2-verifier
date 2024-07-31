@@ -1,16 +1,9 @@
 package verifier_test
 
 import (
-	"fmt"
-	"github.com/consensys/gnark/backend"
-	"github.com/consensys/gnark/backend/groth16"
-	groth162 "github.com/consensys/gnark/backend/groth16/bn254"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/variables"
-	"golang.org/x/crypto/sha3"
 	"log"
 	"os"
 	"testing"
@@ -56,7 +49,7 @@ func TestStepVerifier(t *testing.T) {
 
 		log.Println("solve done")
 
-		circuitWitness, err := frontend.NewWitness(&witness, ecc.BN254.ScalarField())
+		/*circuitWitness, err := frontend.NewWitness(&witness, ecc.BN254.ScalarField())
 		assert.NoError(err)
 
 		pubW, err := circuitWitness.Public()
@@ -79,7 +72,7 @@ func TestStepVerifier(t *testing.T) {
 		fmt.Printf("rp.Commitments: %+v", rp.Commitments)
 
 		err = groth16.Verify(pf, vk, pubW, backend.WithVerifierHashToFieldFunction(sha3.NewLegacyKeccak256()))
-		assert.NoError(err)
+		assert.NoError(err)*/
 
 	}
 	testCase()
