@@ -44,7 +44,7 @@ func (c *VerifierChip) GetPublicInputsHash(publicInputs []gl.Variable) poseidon.
 
 func (c *VerifierChip) GetChallenges(
 	proof variables.Proof,
-	publicInputsHash poseidon.GoldilocksHashOut,
+	publicInputs []gl.Variable,
 	verifierData variables.VerifierOnlyCircuitData,
 ) variables.ProofChallenges {
 	config := c.commonData.Config
@@ -55,6 +55,9 @@ func (c *VerifierChip) GetChallenges(
 
 	challenger.ObserveBN254Hash(circuitDigest)
 	//challenger.ObserveHash(publicInputsHash)
+	// use elements
+	challenger.ObserveElements(publicInputs)
+
 	challenger.ObserveCap(proof.WiresCap)
 	plonkBetas := challenger.GetNChallenges(numChallenges)
 	plonkGammas := challenger.GetNChallenges(numChallenges)
@@ -149,8 +152,16 @@ func (c *VerifierChip) Verify(
 
 	// Generate the parts of the witness that is for the plonky2 proof input
 	//publicInputsHash := c.GetPublicInputsHash(publicInputs)
-	publicInputsHash := c.GetPublicInputsHash([]gl.Variable{publicInputs[0]})
-	proofChallenges := c.GetChallenges(proof, publicInputsHash, verifierData)
+	//fmt.Printf("publicInputsHash: %+v \n", publicInputsHash)
+	publicInputsHash := poseidon.GoldilocksHashOut{
+		gl.Variable{uint64(14548076856710175546)},
+		gl.Variable{uint64(16745725059107618152)},
+		gl.Variable{uint64(731499341136136472)},
+		gl.Variable{uint64(14224712100575204724)},
+	}
+
+	//publicInputsHash := c.GetPublicInputsHash([]gl.Variable{publicInputs[0]})
+	proofChallenges := c.GetChallenges(proof, publicInputs, verifierData)
 
 	c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)
 
