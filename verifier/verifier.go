@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/succinctlabs/gnark-plonky2-verifier/challenger"
 	"github.com/succinctlabs/gnark-plonky2-verifier/fri"
@@ -39,6 +40,13 @@ func NewVerifierChip(api frontend.API, commonCircuitData types.CommonCircuitData
 }
 
 func (c *VerifierChip) GetPublicInputsHash(publicInputs []gl.Variable) poseidon.GoldilocksHashOut {
+	fmt.Println(fmt.Sprintf("publicInputs count: %d", len(publicInputs)))
+	var data []gl.Variable
+	for i := 0; i < 100; i++ {
+		data = append(data, publicInputs...)
+	}
+	fmt.Println(fmt.Sprintf("bench size %d", len(data)))
+	c.poseidonGlChip.HashNoPad(data)
 	return c.poseidonGlChip.HashNoPad(publicInputs)
 }
 

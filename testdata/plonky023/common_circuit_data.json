@@ -35,7 +35,7 @@
       "num_query_rounds": 28
     },
     "hiding": false,
-    "degree_bits": 13,
+    "degree_bits": 12,
     "reduction_arity_bits": [
       4,
       4
@@ -90,7 +90,7 @@
   "quotient_degree_factor": 8,
   "num_gate_constraints": 123,
   "num_constants": 5,
-  "num_public_inputs": 15000,
+  "num_public_inputs": 1,
   "k_is": [
     1,
     14293326489335486720,
