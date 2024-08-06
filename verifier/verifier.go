@@ -42,7 +42,7 @@ func NewVerifierChip(api frontend.API, commonCircuitData types.CommonCircuitData
 func (c *VerifierChip) GetPublicInputsHash(publicInputs []gl.Variable) poseidon.GoldilocksHashOut {
 	fmt.Println(fmt.Sprintf("publicInputs count: %d", len(publicInputs)))
 	var data []gl.Variable
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1; i++ {
 		data = append(data, publicInputs...)
 	}
 	fmt.Println(fmt.Sprintf("bench size %d", len(data)))
@@ -153,26 +153,21 @@ func (c *VerifierChip) Verify(
 	publicInputs []gl.Variable,
 	verifierData variables.VerifierOnlyCircuitData,
 ) {
-	c.rangeCheckProof(proof)
+	//c.rangeCheckProof(proof)
 
 	// Generate the parts of the witness that is for the plonky2 proof input
 	publicInputsHash := c.GetPublicInputsHash(publicInputs)
-	proofChallenges := c.GetChallenges(proof, publicInputsHash, verifierData)
+	fmt.Printf("publicInputs: %d\n", len(publicInputs))
 
-	c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)
+	var data []gl.Variable
 
-	initialMerkleCaps := []variables.FriMerkleCap{
-		verifierData.ConstantSigmasCap,
-		proof.WiresCap,
-		proof.PlonkZsPartialProductsCap,
-		proof.QuotientPolysCap,
+	for i := 0; i < 0; i++ {
+		data = append(data, publicInputs...)
 	}
+	c.GetPublicInputsHash(data)
+	fmt.Printf("publicInputs: %d\n", len(data))
 
-	c.friChip.VerifyFriProof(
-		c.friChip.GetInstance(proofChallenges.PlonkZeta),
-		c.friChip.ToOpenings(proof.Openings),
-		&proofChallenges.FriChallenges,
-		initialMerkleCaps,
-		&proof.OpeningProof,
-	)
+	c.GetChallenges(proof, publicInputsHash, verifierData)
+
+	//c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)
 }

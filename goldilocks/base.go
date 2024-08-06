@@ -16,6 +16,7 @@ package goldilocks
 
 import (
 	"fmt"
+	"github.com/consensys/gnark/std/rangecheck"
 	"math"
 	"math/big"
 	"os"
@@ -26,7 +27,6 @@ import (
 	"github.com/consensys/gnark/constraint/solver"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/math/emulated"
-	"github.com/consensys/gnark/std/rangecheck"
 )
 
 // The multiplicative group generator of the field.
@@ -144,7 +144,7 @@ func New(api frontend.API) *Chip {
 		c.rangeChecker = bitDecompChecker{api: api}
 	} else {
 		if c.rangeCheckerType == COMMIT_RANGE_CHECKER {
-			api.Compiler().Defer(c.checkCollected)
+			//api.Compiler().Defer(c.checkCollected)
 		}
 
 		// If we are using the native or commit range checker, then have gnark's range checker gadget's New function create it.
