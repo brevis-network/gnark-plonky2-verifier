@@ -144,7 +144,8 @@ func New(api frontend.API) *Chip {
 		c.rangeChecker = bitDecompChecker{api: api}
 	} else {
 		if c.rangeCheckerType == COMMIT_RANGE_CHECKER {
-			api.Compiler().Defer(c.checkCollected)
+			// TODO open in future
+			// api.Compiler().Defer(c.checkCollected)
 		}
 
 		// If we are using the native or commit range checker, then have gnark's range checker gadget's New function create it.
@@ -427,7 +428,7 @@ func (p *Chip) checkCollected(api frontend.API) error {
 
 	nbBits := getOptimalBasewidth(p.api, p.rangeCheckCollected)
 	if nbBits != EXPECTED_OPTIMAL_BASEWIDTH {
-		panic("nbBits should be " + strconv.Itoa(EXPECTED_OPTIMAL_BASEWIDTH))
+		panic("nbBits should be " + strconv.Itoa(EXPECTED_OPTIMAL_BASEWIDTH) + " actual: " + strconv.Itoa(nbBits))
 	}
 
 	for _, v := range p.rangeCheckCollected {
