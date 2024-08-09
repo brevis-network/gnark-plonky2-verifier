@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark/frontend"
 	"github.com/succinctlabs/gnark-plonky2-verifier/challenger"
 	"github.com/succinctlabs/gnark-plonky2-verifier/fri"
@@ -149,6 +150,8 @@ func (c *VerifierChip) Verify(
 
 	// Generate the parts of the witness that is for the plonky2 proof input
 	publicInputsHash := c.GetPublicInputsHash(publicInputs)
+	log.Infof("publicInputs: %v", publicInputs)
+	log.Infof("publicInputsHash: %v", publicInputsHash)
 	proofChallenges := c.GetChallenges(proof, publicInputsHash, verifierData)
 
 	c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)

@@ -145,7 +145,7 @@ func New(api frontend.API) *Chip {
 	} else {
 		if c.rangeCheckerType == COMMIT_RANGE_CHECKER {
 			// TODO open in future
-			// api.Compiler().Defer(c.checkCollected)
+			//api.Compiler().Defer(c.checkCollected)
 		}
 
 		// If we are using the native or commit range checker, then have gnark's range checker gadget's New function create it.

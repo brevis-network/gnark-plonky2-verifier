@@ -1,9 +1,6 @@
 package verifier_test
 
 import (
-	"fmt"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/variables"
@@ -57,9 +54,9 @@ func TestStepVerifier(t *testing.T) {
 	//pubW, err := circuitWitness.Public()
 	//assert.NoError(err)
 
-	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, &circuit)
-	assert.NoError(err)
-	fmt.Printf("nb constraint: %d\n", ccs.GetNbConstraints())
+	//ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, &circuit)
+	//assert.NoError(err)
+	//fmt.Printf("nb constraint: %d\n", ccs.GetNbConstraints())
 
 	/*pk, vk, err := groth16.Setup(ccs)
 	if err != nil {
