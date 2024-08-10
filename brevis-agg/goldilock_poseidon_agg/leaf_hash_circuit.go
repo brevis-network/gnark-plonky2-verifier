@@ -13,6 +13,8 @@ type LeafHashCircuit struct {
 
 	MimcHash         frontend.Variable          `gnark:",public"`
 	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"`
+
+	PrivateI frontend.Variable
 }
 
 func (c *LeafHashCircuit) Define(api frontend.API) error {
@@ -37,6 +39,21 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 	mimcHashOutput := mimcHasher.Sum()
 	api.AssertIsEqual(mimcHashOutput, c.MimcHash)
 	log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
+
+	/*commitment, err := api.Compiler().(frontend.Committer).Commit(mimcHashOutput)
+	if err != nil {
+		return err
+	}
+	api.AssertIsDifferent(commitment, 0)*/
+
+	api.AssertIsEqual(c.PrivateI, 1)
+
+	commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
+	if err != nil {
+		return err
+	}
+
+	api.AssertIsDifferent(commitment, 0)
 
 	return nil
 }

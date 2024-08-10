@@ -36,7 +36,7 @@ func TestGetOneGoldilockPoseidonHash(t *testing.T) {
 		data = append(data, 2178309)
 	}
 
-	res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHash(data)
+	res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(data)
 	assert.NoError(err)
 	log.Infof("res: %v", res)
 }

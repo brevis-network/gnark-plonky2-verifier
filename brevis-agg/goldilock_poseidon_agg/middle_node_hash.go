@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra"
-	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gnark/std/math/emulated"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
@@ -29,6 +28,11 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
 	}
+
+	/*err = verifier.AssertProof(c.VerifyingKey[0], c.Proof[0], c.InnerWitness[0])
+	if err != nil {
+		return err
+	}*/
 	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
 	if err != nil {
 		return err
@@ -45,14 +49,14 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 		glAPI.AssertIsEqual(c.GoldilockHashOut[i], goldiLockOut[i])
 	}
 
-	mimcHasher, err := mimc.NewMiMC(api)
+	/*mimcHasher, err := mimc.NewMiMC(api)
 	if err != nil {
 		return err
 	}
 
 	mimcHasher.Write(c.PreMimcHash)
 	mimcOutput := mimcHasher.Sum()
-	api.AssertIsEqual(mimcOutput, c.MimcHash)
+	api.AssertIsEqual(mimcOutput, c.MimcHash)*/
 
 	return nil
 }

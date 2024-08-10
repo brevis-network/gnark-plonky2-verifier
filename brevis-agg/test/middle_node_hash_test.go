@@ -22,11 +22,11 @@ func TestMiddleNode(t *testing.T) {
 		data = append(data, 2178309)
 	}
 	subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1 := GetLeafProof(assert, data)
-	err := groth16.Verify(subProof1, subVk1, subWitness1)
+	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
 	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetLeafProof(assert, data)
-	err = groth16.Verify(subProof2, subVk2, subWitness2)
+	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
 	mimcHasher := mimc.NewMiMC()

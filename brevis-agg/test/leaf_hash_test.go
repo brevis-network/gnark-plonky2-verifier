@@ -52,12 +52,14 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 		RawData:          gldatas,
 		MimcHash:         circuitMimcHash,
 		GoldilockHashOut: glHash,
+		PrivateI:         1,
 	}
 
 	assigment := &goldilock_poseidon_agg.LeafHashCircuit{
 		RawData:          gldatas,
 		MimcHash:         circuitMimcHash,
 		GoldilockHashOut: glHash,
+		PrivateI:         1,
 	}
 
 	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
