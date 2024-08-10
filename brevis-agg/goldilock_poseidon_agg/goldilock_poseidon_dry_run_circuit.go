@@ -28,13 +28,17 @@ func (c *GoldilockPoseidonDryRunCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func GetGoldilockPoseidonHash(datas []uint64) (poseidon.GoldilocksHashOut, error) {
-	getGpHashLock.Lock()
-	defer getGpHashLock.Unlock()
+func GetGoldilockPoseidonHashByUint64(datas []uint64) (poseidon.GoldilocksHashOut, error) {
 	var rawData []gl.Variable
 	for i := 0; i < len(datas); i++ {
 		rawData = append(rawData, gl.NewVariable(datas[i]))
 	}
+	return GetGoldilockPoseidonHashByGl(rawData)
+}
+
+func GetGoldilockPoseidonHashByGl(rawData []gl.Variable) (poseidon.GoldilocksHashOut, error) {
+	getGpHashLock.Lock()
+	defer getGpHashLock.Unlock()
 
 	circuit := &GoldilockPoseidonDryRunCircuit{
 		RawData: rawData,

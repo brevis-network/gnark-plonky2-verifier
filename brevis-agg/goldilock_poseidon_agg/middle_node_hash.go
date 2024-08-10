@@ -13,15 +13,15 @@ import (
 
 // normal, 2 to 1
 type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2El algebra.G2ElementT, GtEl algebra.GtElementT] struct {
-	PreMimcHash         []frontend.Variable          `gnark:",public"`
-	PreGoldilockHashOut []poseidon.GoldilocksHashOut `gnark:",public"`
+	PreMimcHash         []frontend.Variable
+	PreGoldilockHashOut []poseidon.GoldilocksHashOut
 
 	MimcHash         frontend.Variable          `gnark:",public"`
 	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"`
 
-	Proof        regroth16.Proof[G1El, G2El]
-	VerifyingKey regroth16.VerifyingKey[G1El, G2El, GtEl]
-	InnerWitness regroth16.Witness[FR]
+	Proof        []regroth16.Proof[G1El, G2El]
+	VerifyingKey []regroth16.VerifyingKey[G1El, G2El, GtEl]
+	InnerWitness []regroth16.Witness[FR]
 }
 
 func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
@@ -29,7 +29,7 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
 	}
-	err = verifier.AssertProof(c.VerifyingKey, c.Proof, c.InnerWitness)
+	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
 	if err != nil {
 		return err
 	}
