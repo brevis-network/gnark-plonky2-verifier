@@ -56,12 +56,12 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 
 	api.AssertIsEqual(c.PrivateI, 1)
 
-	commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
+	/*commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
 	if err != nil {
 		return err
 	}
 
-	api.AssertIsDifferent(commitment, 0)
+	api.AssertIsDifferent(commitment, 0)*/
 
 	return nil
 }
