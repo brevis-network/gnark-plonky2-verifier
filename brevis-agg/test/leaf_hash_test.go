@@ -82,10 +82,6 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 	pk, vk, err := groth16.Setup(ccs)
 	assert.NoError(err)
 
-	/*for i := 0; i < 4; i++ {
-		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
-	}*/
-
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 

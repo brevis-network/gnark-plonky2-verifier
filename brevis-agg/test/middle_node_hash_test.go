@@ -3,7 +3,6 @@ package test
 import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
-	bn254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
@@ -108,11 +107,6 @@ func TestMiddleNode(t *testing.T) {
 
 	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
-
-	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
-	assert.NoError(err)
-
-	log.Infof("%v %v", len(fullWitness.Vector().(bn254_fr.Vector)), len(fullWitness2.Vector().(bn254_fr.Vector)))
 
 	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
 	assert.NoError(err)
