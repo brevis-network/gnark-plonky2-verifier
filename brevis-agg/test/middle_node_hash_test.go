@@ -4,6 +4,7 @@ import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
+	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
@@ -107,7 +108,26 @@ func TestMiddleNode(t *testing.T) {
 
 	log.Infof("solve done")
 
+	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	pubWitness, err := fullWitness.Public()
+	assert.NoError(err)
+
 	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
+	assert.NoError(err)
+
+	pk, vk, err := groth16.Setup(ccs)
+	assert.NoError(err)
+
+	for i := 0; i < 4; i++ {
+		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
+	}
+
+	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
+	assert.NoError(err)
+
+	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
 	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
