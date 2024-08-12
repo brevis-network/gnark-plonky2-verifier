@@ -25,6 +25,35 @@ type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2E
 }
 
 func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
+	glAPI := gl.New(api)
+	poseidonGlChip := poseidon.NewGoldilocksChip(api)
+	var goldilockPreImage []gl.Variable
+	for i := 0; i < len(c.PreGoldilockHashOut); i++ {
+		goldilockPreImage = append(goldilockPreImage, c.PreGoldilockHashOut[i][:]...)
+	}
+	goldiLockOut := poseidonGlChip.HashNoPad(goldilockPreImage)
+	for i := 0; i < len(goldiLockOut); i++ {
+		glAPI.AssertIsEqual(c.GoldilockHashOut[i], goldiLockOut[i])
+	}
+
+	var placeholder []gl.Variable
+	for i := 0; i < 30; i++ {
+		placeholder = append(placeholder, gl.NewVariable(100))
+	}
+	for i := 0; i < 4; i++ {
+		poseidonGlChip.HashNoPad(placeholder)
+	}
+
+	mimcHasher, err := mimc.NewMiMC(api)
+	if err != nil {
+		return err
+	}
+
+	mimcHasher.Write(c.PreMimcHash[0])
+	mimcHasher.Write(c.PreMimcHash[1])
+	mimcOutput := mimcHasher.Sum()
+	api.AssertIsEqual(mimcOutput, c.MimcHash)
+
 	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
@@ -38,27 +67,6 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	if err != nil {
 		return err
 	}
-
-	glAPI := gl.New(api)
-	poseidonGlChip := poseidon.NewGoldilocksChip(api)
-	var goldilockPreImage []gl.Variable
-	for i := 0; i < len(c.PreGoldilockHashOut); i++ {
-		goldilockPreImage = append(goldilockPreImage, c.PreGoldilockHashOut[i][:]...)
-	}
-	goldiLockOut := poseidonGlChip.HashNoPad(goldilockPreImage)
-	for i := 0; i < len(goldiLockOut); i++ {
-		glAPI.AssertIsEqual(c.GoldilockHashOut[i], goldiLockOut[i])
-	}
-
-	mimcHasher, err := mimc.NewMiMC(api)
-	if err != nil {
-		return err
-	}
-
-	mimcHasher.Write(c.PreMimcHash[0])
-	mimcHasher.Write(c.PreMimcHash[1])
-	mimcOutput := mimcHasher.Sum()
-	api.AssertIsEqual(mimcOutput, c.MimcHash)
 
 	return nil
 }

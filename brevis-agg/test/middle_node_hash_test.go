@@ -1,21 +1,28 @@
 package test
 
 import (
+	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
+	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"github.com/consensys/gnark/logger"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/consensys/gnark/test"
+	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	"math/big"
+	"os"
 	"testing"
 )
 
 func TestMiddleNode(t *testing.T) {
+	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
+
 	assert := test.NewAssert(t)
 	var data []uint64
 	for i := 0; i < 30; i++ {
@@ -97,4 +104,12 @@ func TestMiddleNode(t *testing.T) {
 
 	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
+
+	log.Infof("solve done")
+
+	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
+	assert.NoError(err)
+
+	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
+
 }

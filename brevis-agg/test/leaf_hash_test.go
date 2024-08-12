@@ -9,16 +9,20 @@ import (
 	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"github.com/consensys/gnark/logger"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/consensys/gnark/test"
+	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	"math/big"
+	"os"
 	"testing"
 )
 
 func TestLeafHashCircuit(t *testing.T) {
+	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
 	assert := test.NewAssert(t)
 	var data []uint64
 	for i := 0; i < 30; i++ {
@@ -84,7 +88,7 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	log.Infof("leaf prove done")
+	log.Infof("leaf prove done ccs: %d", ccs.GetNbConstraints())
 
 	return ccs, proof, vk, pubWitness, circuitMimcHash, glHash
 }

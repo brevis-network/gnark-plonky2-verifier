@@ -22,6 +22,14 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	output := poseidonGlChip.HashNoPad(c.RawData)
 
+	var placeholder []gl.Variable
+	for i := 0; i < 30; i++ {
+		placeholder = append(placeholder, gl.NewVariable(100))
+	}
+	for i := 0; i < 4; i++ {
+		poseidonGlChip.HashNoPad(placeholder)
+	}
+
 	// Check that output is correct
 	for i := 0; i < 4; i++ {
 		glAPI.AssertIsEqual(output[i], c.GoldilockHashOut[i])
@@ -48,12 +56,12 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 
 	api.AssertIsEqual(c.PrivateI, 1)
 
-	commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
+	/*commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
 	if err != nil {
 		return err
 	}
 
-	api.AssertIsDifferent(commitment, 0)
+	api.AssertIsDifferent(commitment, 0)*/
 
 	return nil
 }
