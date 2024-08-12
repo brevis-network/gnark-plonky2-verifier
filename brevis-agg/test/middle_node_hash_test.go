@@ -115,16 +115,16 @@ func TestMiddleNode(t *testing.T) {
 
 	log.Infof("solve done")
 
-	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
-	assert.NoError(err)
-
-	pk, vk, err := groth16.Setup(ccs)
-	assert.NoError(err)
-
 	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
 
 	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
+	assert.NoError(err)
+
+	pk, vk, err := groth16.Setup(ccs)
 	assert.NoError(err)
 
 	log.Infof("%v %v", len(fullWitness.Vector().(bn254_fr.Vector)), len(fullWitness2.Vector().(bn254_fr.Vector)))
