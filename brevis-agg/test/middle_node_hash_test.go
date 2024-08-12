@@ -55,11 +55,6 @@ func TestMiddleNode(t *testing.T) {
 	glHashout, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByGl(glPreimage)
 	assert.NoError(err)
 
-	/*
-		Proof:        PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerCcs),
-				InnerWitness: PlaceholderWitness[sw_bn254.ScalarField](innerCcs),
-				VerifyingKey: PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerCcs),
-	*/
 	proofPlaceholder1 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs1)
 	witnessPlaceholder1 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](subCcs1)
 	vkPlaceholder1 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs1)
@@ -92,7 +87,7 @@ func TestMiddleNode(t *testing.T) {
 		InnerWitness:        []regroth16.Witness[sw_bn254.ScalarField]{witnessPlaceholder1, witnessPlaceholder2},
 	}
 
-	circuit = &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
+	/*circuit = &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
 		PreMimcHash:         []frontend.Variable{mimc1, mimc2},
 		PreGoldilockHashOut: []poseidon.GoldilocksHashOut{gl1, gl2},
 		MimcHash:            circuitMimcHash,
@@ -101,7 +96,7 @@ func TestMiddleNode(t *testing.T) {
 		Proof:        []regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]{circuitProof1, circuitProof2},
 		VerifyingKey: []regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{circuitVk1, circuitVk2},
 		InnerWitness: []regroth16.Witness[sw_bn254.ScalarField]{circuitWitness1, circuitWitness2},
-	}
+	}*/
 
 	assigment := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
 		PreMimcHash:         []frontend.Variable{mimc1, mimc2},
@@ -130,10 +125,6 @@ func TestMiddleNode(t *testing.T) {
 
 	pk, vk, err := groth16.Setup(ccs)
 	assert.NoError(err)
-
-	for i := 0; i < 4; i++ {
-		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
-	}
 
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
 	assert.NoError(err)
