@@ -3,6 +3,7 @@ package goldilock_poseidon_agg
 import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra"
+	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gnark/std/math/emulated"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
@@ -40,7 +41,7 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	for i := 0; i < 4; i++ {
 		poseidonGlChip.HashNoPad(placeholder)
 	}
-
+	*/
 	mimcHasher, err := mimc.NewMiMC(api)
 	if err != nil {
 		return err
@@ -51,7 +52,7 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	mimcOutput := mimcHasher.Sum()
 	api.AssertIsEqual(mimcOutput, c.MimcHash)
 
-	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
+	/*verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
 	}*/
