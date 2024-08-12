@@ -121,6 +121,13 @@ func TestMiddleNode(t *testing.T) {
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
 
+	for i := 0; i < 4; i++ {
+		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
+	}
+	for i := 0; i < 4; i++ {
+		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	}
+
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
 	assert.NoError(err)
 
