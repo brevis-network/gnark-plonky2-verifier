@@ -28,6 +28,16 @@ type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2E
 }
 
 func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
+	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
+	if err != nil {
+		return fmt.Errorf("new verifier: %w", err)
+	}
+
+	err = verifier.BatchAssertProofBrevis(c.VerifyingKey[:], c.Proof[:], c.InnerWitness[:])
+	if err != nil {
+		return err
+	}
+
 	glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	var goldilockPreImage []gl.Variable
@@ -56,16 +66,6 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	mimcHasher.Write(c.PreMimcHash[1])
 	mimcOutput := mimcHasher.Sum()
 	api.AssertIsEqual(mimcOutput, c.MimcHash)
-
-	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
-	if err != nil {
-		return fmt.Errorf("new verifier: %w", err)
-	}
-
-	err = verifier.BatchAssertProofBrevis(c.VerifyingKey[:], c.Proof[:], c.InnerWitness[:])
-	if err != nil {
-		return err
-	}
 
 	for x, cm := range c.InnerWitness {
 		h0 := cm.Public[0].Limbs[3]
