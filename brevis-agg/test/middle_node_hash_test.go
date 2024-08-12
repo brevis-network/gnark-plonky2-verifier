@@ -60,13 +60,13 @@ func TestMiddleNode(t *testing.T) {
 				InnerWitness: PlaceholderWitness[sw_bn254.ScalarField](innerCcs),
 				VerifyingKey: PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerCcs),
 	*/
-	/*proofPlaceholder1 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs1)
+	proofPlaceholder1 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs1)
 	witnessPlaceholder1 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](subCcs1)
 	vkPlaceholder1 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs1)
 
 	proofPlaceholder2 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs2)
 	witnessPlaceholder2 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](subCcs2)
-	vkPlaceholder2 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs2)*/
+	vkPlaceholder2 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs2)
 
 	circuitVk1, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subVk1)
 	assert.NoError(err)
@@ -82,7 +82,7 @@ func TestMiddleNode(t *testing.T) {
 	circuitProof2, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subProof2)
 	assert.NoError(err)
 
-	/*circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
+	circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
 		PreMimcHash:         []frontend.Variable{mimc1, mimc2},
 		PreGoldilockHashOut: []poseidon.GoldilocksHashOut{gl1, gl2},
 		MimcHash:            circuitMimcHash,
@@ -90,9 +90,9 @@ func TestMiddleNode(t *testing.T) {
 		Proof:               []regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]{proofPlaceholder1, proofPlaceholder2},
 		VerifyingKey:        []regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{vkPlaceholder1, vkPlaceholder2},
 		InnerWitness:        []regroth16.Witness[sw_bn254.ScalarField]{witnessPlaceholder1, witnessPlaceholder2},
-	}*/
+	}
 
-	circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
+	circuit = &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
 		PreMimcHash:         []frontend.Variable{mimc1, mimc2},
 		PreGoldilockHashOut: []poseidon.GoldilocksHashOut{gl1, gl2},
 		MimcHash:            circuitMimcHash,
