@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra"
+	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gnark/std/math/emulated"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
+	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 )
 
@@ -23,7 +25,7 @@ type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2E
 }
 
 func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
-	/*glAPI := gl.New(api)
+	glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	var goldilockPreImage []gl.Variable
 	for i := 0; i < len(c.PreGoldilockHashOut); i++ {
@@ -41,8 +43,8 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	for i := 0; i < 4; i++ {
 		poseidonGlChip.HashNoPad(placeholder)
 	}
-	*/
-	/*mimcHasher, err := mimc.NewMiMC(api)
+
+	mimcHasher, err := mimc.NewMiMC(api)
 	if err != nil {
 		return err
 	}
@@ -50,7 +52,7 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	mimcHasher.Write(c.PreMimcHash[0])
 	mimcHasher.Write(c.PreMimcHash[1])
 	mimcOutput := mimcHasher.Sum()
-	api.AssertIsEqual(mimcOutput, c.MimcHash)*/
+	api.AssertIsEqual(mimcOutput, c.MimcHash)
 
 	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
 	if err != nil {
