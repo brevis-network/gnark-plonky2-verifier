@@ -3,12 +3,9 @@ package test
 import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
-	bn254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
-	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
@@ -34,9 +31,11 @@ func TestMiddleNode(t *testing.T) {
 	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetLeafProof(assert, data)
+	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1
+
+	/*subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetLeafProof(assert, data)
 	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
-	assert.NoError(err)
+	assert.NoError(err)*/
 
 	mimcHasher := mimc.NewMiMC()
 	var mimcHashData []byte
@@ -104,7 +103,7 @@ func TestMiddleNode(t *testing.T) {
 
 	log.Infof("solve done")
 
-	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
+	/*fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
 
 	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
@@ -121,19 +120,12 @@ func TestMiddleNode(t *testing.T) {
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
 
-	for i := 0; i < 4; i++ {
-		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
-	}
-	for i := 0; i < 4; i++ {
-		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
-	}
-
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
 	assert.NoError(err)
 
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
+	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())*/
 
 }

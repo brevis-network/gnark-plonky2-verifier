@@ -9,6 +9,7 @@ import (
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
+	"math/big"
 )
 
 const MiddleNodeAggSize = 2
@@ -64,6 +65,24 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	err = verifier.BatchAssertProofBrevis(c.VerifyingKey[:], c.Proof[:], c.InnerWitness[:])
 	if err != nil {
 		return err
+	}
+
+	for x, cm := range c.InnerWitness {
+		h0 := cm.Public[0].Limbs[3]
+		h1 := cm.Public[0].Limbs[2]
+		h2 := cm.Public[0].Limbs[1]
+		h3 := cm.Public[0].Limbs[0]
+
+		h0 = api.Mul(h0, big.NewInt(1).Lsh(big.NewInt(1), 192))
+		h1 = api.Mul(h1, big.NewInt(1).Lsh(big.NewInt(1), 128))
+		h2 = api.Mul(h2, big.NewInt(1).Lsh(big.NewInt(1), 64))
+		res := api.Add(h0, h1, h2, h3)
+		api.AssertIsEqual(res, c.PreMimcHash[x])
+
+		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[1].Limbs[0]), c.PreGoldilockHashOut[x][0])
+		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[2].Limbs[0]), c.PreGoldilockHashOut[x][1])
+		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[3].Limbs[0]), c.PreGoldilockHashOut[x][2])
+		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[4].Limbs[0]), c.PreGoldilockHashOut[x][3])
 	}
 
 	return nil
