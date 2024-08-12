@@ -1,6 +1,7 @@
 package goldilock_poseidon_agg
 
 import (
+	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra"
 	"github.com/consensys/gnark/std/hash/mimc"
@@ -52,19 +53,19 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	mimcOutput := mimcHasher.Sum()
 	api.AssertIsEqual(mimcOutput, c.MimcHash)
 
-	/*verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
+	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
-	}*/
+	}
 
 	/*err = verifier.AssertProof(c.VerifyingKey[0], c.Proof[0], c.InnerWitness[0])
 	if err != nil {
 		return err
 	}*/
-	/*err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
 	if err != nil {
 		return err
-	}*/
+	}
 
 	return nil
 }
