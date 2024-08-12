@@ -57,14 +57,14 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 		return fmt.Errorf("new verifier: %w", err)
 	}
 
-	/*err = verifier.AssertProof(c.VerifyingKey[0], c.Proof[0], c.InnerWitness[0])
-	if err != nil {
-		return err
-	}*/
-	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	err = verifier.AssertProof(c.VerifyingKey[0], c.Proof[0], c.InnerWitness[0])
 	if err != nil {
 		return err
 	}
+	/*err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	if err != nil {
+		return err
+	}*/
 
 	return nil
 }
