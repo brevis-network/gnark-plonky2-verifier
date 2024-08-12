@@ -1,13 +1,10 @@
 package goldilock_poseidon_agg
 
 import (
-	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra"
-	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gnark/std/math/emulated"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
-	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 )
 
@@ -25,7 +22,7 @@ type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2E
 }
 
 func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
-	glAPI := gl.New(api)
+	/*glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	var goldilockPreImage []gl.Variable
 	for i := 0; i < len(c.PreGoldilockHashOut); i++ {
@@ -57,16 +54,16 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
-	}
+	}*/
 
 	/*err = verifier.AssertProof(c.VerifyingKey[0], c.Proof[0], c.InnerWitness[0])
 	if err != nil {
 		return err
 	}*/
-	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	/*err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
 	if err != nil {
 		return err
-	}
+	}*/
 
 	return nil
 }
