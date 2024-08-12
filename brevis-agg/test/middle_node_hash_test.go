@@ -3,9 +3,12 @@ package test
 import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
+	bn254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
+	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
+	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
@@ -103,7 +106,7 @@ func TestMiddleNode(t *testing.T) {
 
 	log.Infof("solve done")
 
-	/*fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
+	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
 
 	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
@@ -126,6 +129,6 @@ func TestMiddleNode(t *testing.T) {
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())*/
+	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
 
 }
