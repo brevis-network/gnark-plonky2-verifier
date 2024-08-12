@@ -110,17 +110,6 @@ func TestMiddleNode(t *testing.T) {
 		InnerWitness: []regroth16.Witness[sw_bn254.ScalarField]{circuitWitness1, circuitWitness2},
 	}
 
-	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
-	assert.NoError(err)
-
-	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
-	assert.NoError(err)
-
-	log.Infof("%v %v", len(fullWitness.Vector().(bn254_fr.Vector)), len(fullWitness2.Vector().(bn254_fr.Vector)))
-
-	pubWitness, err := fullWitness.Public()
-	assert.NoError(err)
-
 	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
 
@@ -130,6 +119,17 @@ func TestMiddleNode(t *testing.T) {
 	assert.NoError(err)
 
 	pk, vk, err := groth16.Setup(ccs)
+	assert.NoError(err)
+
+	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	fullWitness2, err := frontend.NewWitness(circuit, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	log.Infof("%v %v", len(fullWitness.Vector().(bn254_fr.Vector)), len(fullWitness2.Vector().(bn254_fr.Vector)))
+
+	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
 
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
