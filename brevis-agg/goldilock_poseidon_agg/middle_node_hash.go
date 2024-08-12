@@ -63,10 +63,14 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	if err != nil {
 		return err
 	}
-	/*err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	err = verifier.AssertProof(c.VerifyingKey[1], c.Proof[1], c.InnerWitness[1])
 	if err != nil {
 		return err
-	}*/
+	}
+	err = verifier.BatchAssertProofBrevis(c.VerifyingKey, c.Proof, c.InnerWitness)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
