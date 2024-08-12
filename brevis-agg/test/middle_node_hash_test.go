@@ -109,16 +109,16 @@ func TestMiddleNode(t *testing.T) {
 		InnerWitness: []regroth16.Witness[sw_bn254.ScalarField]{circuitWitness1, circuitWitness2},
 	}
 
-	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
-	assert.NoError(err)
-
-	log.Infof("solve done")
-
 	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
 	assert.NoError(err)
 
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
+
+	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	log.Infof("solve done")
 
 	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
 	assert.NoError(err)
