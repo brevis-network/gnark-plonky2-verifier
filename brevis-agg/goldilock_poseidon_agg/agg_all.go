@@ -20,14 +20,14 @@ type AggAllCircuit struct {
 	AppVkHash     frontend.Variable `gnark:",public"`
 
 	// plonky2
-	Plonky2PublicInputs            []gl.Variable `gnark:",public"` // should be 4, equal to one goldilock poseidon hash
+	Plonky2PublicInputs            []gl.Variable // should be 4, equal to one goldilock poseidon hash
 	Plonky2Proof                   variables.Proof
 	Plonky2VerifierOnlyCircuitData variables.VerifierOnlyCircuitData
 	// This is configuration for the circuit, it is a constant not a variable
 	Plonky2CommonCircuitData types.CommonCircuitData
 
-	MimcHash         frontend.Variable          `gnark:",public"` // the hash custom circuit use
-	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"` // the hash equal to plonky2 public input
+	MimcHash         frontend.Variable          // the hash custom circuit use
+	GoldilockHashOut poseidon.GoldilocksHashOut // the hash equal to plonky2 public input
 
 	HashProof        regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]
 	HashVerifyingKey regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]
