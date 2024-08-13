@@ -5,6 +5,7 @@ import (
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend/groth16"
+	bn254_groth16 "github.com/consensys/gnark/backend/groth16/bn254"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
@@ -88,7 +89,7 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	log.Infof("leaf prove done ccs: %d", ccs.GetNbConstraints())
+	log.Infof("leaf prove done ccs: %d, proof commitment: %d", ccs.GetNbConstraints(), len(proof.(*bn254_groth16.Proof).Commitments))
 
 	return ccs, proof, vk, pubWitness, circuitMimcHash, glHash
 }
