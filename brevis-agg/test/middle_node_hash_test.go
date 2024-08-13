@@ -43,7 +43,7 @@ func TestMiddleNode(t *testing.T) {
 	commitmentWires := commitments.CommitmentIndexes()
 	log.Infof("leaf ccs data: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs1.GetNbPublicVariables()))
 
-	ccsRe, err := goldilock_poseidon_agg.GetDummyMiddleNodeCcs()
+	ccsRe, err := goldilock_poseidon_agg.GetDummyLeafCcs()
 	assert.NoError(err)
 	//subCcs1 = ccsRe
 

@@ -9,6 +9,7 @@ import (
 )
 
 type MiddleNodeDummy struct {
+	PrivateI frontend.Variable
 	MimcHash [5]frontend.Variable `gnark:",public"`
 }
 
@@ -18,20 +19,25 @@ func (c *MiddleNodeDummy) Define(api frontend.API) error {
 	api.AssertIsEqual(c.MimcHash[2], 1)
 	api.AssertIsEqual(c.MimcHash[3], 1)
 	api.AssertIsEqual(c.MimcHash[4], 1)
-	commitment, err := api.Compiler().(frontend.Committer).Commit(c.MimcHash[0])
+	api.AssertIsEqual(c.PrivateI, 1)
+
+	commitment, err := api.Compiler().(frontend.Committer).Commit(c.PrivateI)
 	if err != nil {
 		return err
 	}
 	api.AssertIsDifferent(commitment, 0)
+
 	return nil
 }
 
 func GetDummyMiddleNodeCcs() (constraint.ConstraintSystem, error) {
 	circuit := &MiddleNodeDummy{
+		PrivateI: 1,
 		MimcHash: [5]frontend.Variable{1, 1, 1, 1, 1},
 	}
 
 	assigment := &MiddleNodeDummy{
+		PrivateI: 1,
 		MimcHash: [5]frontend.Variable{1, 1, 1, 1, 1},
 	}
 
