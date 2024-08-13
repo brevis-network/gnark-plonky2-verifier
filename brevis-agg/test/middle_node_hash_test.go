@@ -4,8 +4,9 @@ import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
-	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
+	"github.com/consensys/gnark/backend/witness"
+	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 	"github.com/consensys/gnark/logger"
@@ -33,55 +34,53 @@ func TestMiddleNode(t *testing.T) {
 	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1
+	GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
+}
 
-	/*subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetLeafProof(assert, data)
-	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
-	assert.NoError(err)*/
-
+func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSystem, innerProof groth16.Proof, innerVk groth16.VerifyingKey, innerWitness witness.Witness, innerMimcHash *big.Int, innerGPHash poseidon.GoldilocksHashOut) (constraint.ConstraintSystem, groth16.Proof, groth16.VerifyingKey, witness.Witness, *big.Int, poseidon.GoldilocksHashOut) {
 	mimcHasher := mimc.NewMiMC()
 	var mimcHashData []byte
 
 	var mimcBlockBuf [mimc.BlockSize]byte
-	mimcHashData = append(mimcHashData, mimc1.FillBytes(mimcBlockBuf[:])...)
-	mimcHashData = append(mimcHashData, mimc2.FillBytes(mimcBlockBuf[:])...)
-	_, err = mimcHasher.Write(mimcHashData)
+	mimcHashData = append(mimcHashData, innerMimcHash.FillBytes(mimcBlockBuf[:])...)
+	mimcHashData = append(mimcHashData, innerMimcHash.FillBytes(mimcBlockBuf[:])...)
+	_, err := mimcHasher.Write(mimcHashData)
 	assert.NoError(err)
 
 	mimcHashOut := mimcHasher.Sum(nil)
 	circuitMimcHash := new(big.Int).SetBytes(mimcHashOut)
 
 	var glPreimage []gl.Variable
-	glPreimage = append(glPreimage, gl1[:]...)
-	glPreimage = append(glPreimage, gl2[:]...)
+	glPreimage = append(glPreimage, innerGPHash[:]...)
+	glPreimage = append(glPreimage, innerGPHash[:]...)
 	glHashout, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByGl(glPreimage)
 	assert.NoError(err)
 
-	proofPlaceholder1 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs1)
-	witnessPlaceholder1 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](subCcs1)
-	vkPlaceholder1 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs1)
+	proofPlaceholder1 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerCcs)
+	witnessPlaceholder1 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](innerCcs)
+	vkPlaceholder1 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerCcs)
 
-	proofPlaceholder2 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subCcs2)
-	witnessPlaceholder2 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](subCcs2)
-	vkPlaceholder2 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subCcs2)
+	proofPlaceholder2 := regroth16.PlaceholderProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerCcs)
+	witnessPlaceholder2 := regroth16.PlaceholderWitness[sw_bn254.ScalarField](innerCcs)
+	vkPlaceholder2 := regroth16.PlaceholderVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerCcs)
 
-	circuitVk1, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subVk1)
+	circuitVk1, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerVk)
 	assert.NoError(err)
-	circuitWitness1, err := regroth16.ValueOfWitness[sw_bn254.ScalarField](subWitness1)
+	circuitWitness1, err := regroth16.ValueOfWitness[sw_bn254.ScalarField](innerWitness)
 	assert.NoError(err)
-	circuitProof1, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subProof1)
+	circuitProof1, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerProof)
 	assert.NoError(err)
 
-	circuitVk2, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subVk2)
+	circuitVk2, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](innerVk)
 	assert.NoError(err)
-	circuitWitness2, err := regroth16.ValueOfWitness[sw_bn254.ScalarField](subWitness2)
+	circuitWitness2, err := regroth16.ValueOfWitness[sw_bn254.ScalarField](innerWitness)
 	assert.NoError(err)
-	circuitProof2, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subProof2)
+	circuitProof2, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerProof)
 	assert.NoError(err)
 
 	circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
-		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{mimc1, mimc2},
-		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{gl1, gl2},
+		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{innerMimcHash, innerMimcHash},
+		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{innerGPHash, innerGPHash},
 		MimcHash:            circuitMimcHash,
 		GoldilockHashOut:    glHashout,
 		Proof:               [goldilock_poseidon_agg.MiddleNodeAggSize]regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]{proofPlaceholder1, proofPlaceholder2},
@@ -90,8 +89,8 @@ func TestMiddleNode(t *testing.T) {
 	}
 
 	assigment := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
-		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{mimc1, mimc2},
-		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{gl1, gl2},
+		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{innerMimcHash, innerMimcHash},
+		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{innerGPHash, innerGPHash},
 		MimcHash:            circuitMimcHash,
 		GoldilockHashOut:    glHashout,
 
@@ -117,11 +116,7 @@ func TestMiddleNode(t *testing.T) {
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
 
-	for i := 0; i < 4; i++ {
-		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
-	}
-
-	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration())
+	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
@@ -129,4 +124,5 @@ func TestMiddleNode(t *testing.T) {
 
 	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
 
+	return ccs, proof, vk, pubWitness, circuitMimcHash, glHashout
 }
