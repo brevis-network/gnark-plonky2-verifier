@@ -8,11 +8,18 @@ require (
 	github.com/consensys/gnark-ignition-verifier v0.0.0-20230527014722-10693546ab33
 )
 
-require github.com/ingonyama-zk/icicle/v2 v2.0.3 // indirect
+require (
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/ethereum/go-ethereum v1.13.8 // indirect
+	github.com/holiman/uint256 v1.2.4 // indirect
+	github.com/ingonyama-zk/icicle/v2 v2.0.3 // indirect
+)
 
 require (
 	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/brevis-network/zk-utils v0.0.0-20240813134119-ba7dcedc2e42
 	github.com/celer-network/goutils v0.1.60
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

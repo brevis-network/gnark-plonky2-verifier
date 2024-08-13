@@ -122,7 +122,7 @@ func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSy
 	circuitProof2, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](innerProof)
 	assert.NoError(err)
 
-	circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
+	circuit := &goldilock_poseidon_agg.MiddleNodeHashCircuit{
 		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{innerMimcHash, innerMimcHash},
 		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{innerGPHash, innerGPHash},
 		MimcHash:            circuitMimcHash,
@@ -132,7 +132,7 @@ func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSy
 		InnerWitness:        [goldilock_poseidon_agg.MiddleNodeAggSize]regroth16.Witness[sw_bn254.ScalarField]{witnessPlaceholder1, witnessPlaceholder2},
 	}
 
-	assigment := &goldilock_poseidon_agg.MiddleNodeHashCircuit[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]{
+	assigment := &goldilock_poseidon_agg.MiddleNodeHashCircuit{
 		PreMimcHash:         [goldilock_poseidon_agg.MiddleNodeAggSize]frontend.Variable{innerMimcHash, innerMimcHash},
 		PreGoldilockHashOut: [goldilock_poseidon_agg.MiddleNodeAggSize]poseidon.GoldilocksHashOut{innerGPHash, innerGPHash},
 		MimcHash:            circuitMimcHash,

@@ -3,9 +3,8 @@ package goldilock_poseidon_agg
 import (
 	"fmt"
 	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/std/algebra"
+	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	"github.com/consensys/gnark/std/hash/mimc"
-	"github.com/consensys/gnark/std/math/emulated"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
@@ -15,19 +14,19 @@ import (
 const MiddleNodeAggSize = 2
 
 // normal, 2 to 1
-type MiddleNodeHashCircuit[FR emulated.FieldParams, G1El algebra.G1ElementT, G2El algebra.G2ElementT, GtEl algebra.GtElementT] struct {
+type MiddleNodeHashCircuit struct {
 	PreMimcHash         [MiddleNodeAggSize]frontend.Variable
 	PreGoldilockHashOut [MiddleNodeAggSize]poseidon.GoldilocksHashOut
 
 	MimcHash         frontend.Variable          `gnark:",public"`
 	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"`
 
-	Proof        [MiddleNodeAggSize]regroth16.Proof[G1El, G2El]
-	VerifyingKey [MiddleNodeAggSize]regroth16.VerifyingKey[G1El, G2El, GtEl]
-	InnerWitness [MiddleNodeAggSize]regroth16.Witness[FR]
+	Proof        [MiddleNodeAggSize]regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]
+	VerifyingKey [MiddleNodeAggSize]regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]
+	InnerWitness [MiddleNodeAggSize]regroth16.Witness[sw_bn254.ScalarField]
 }
 
-func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) error {
+func (c *MiddleNodeHashCircuit) Define(api frontend.API) error {
 	glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	var goldilockPreImage []gl.Variable
@@ -75,7 +74,7 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[4].Limbs[0]), c.PreGoldilockHashOut[x][3])
 	}
 
-	verifier, err := regroth16.NewVerifier[FR, G1El, G2El, GtEl](api)
+	verifier, err := regroth16.NewVerifier[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](api)
 	if err != nil {
 		return fmt.Errorf("new verifier: %w", err)
 	}
@@ -86,4 +85,16 @@ func (c *MiddleNodeHashCircuit[FR, G1El, G2El, GtEl]) Define(api frontend.API) e
 	}
 
 	return nil
+}
+
+func GetMiddleNodeCircuitCcsPlaceHolder() (regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl], regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine], regroth16.Witness[sw_bn254.ScalarField]) {
+	nbPublicVariables := 6
+	commitmentsLen := 1
+	publicAndCommitmentCommitted := [][]int{{}}
+
+	batchVkPlaceHolder := regroth16.PlaceholderVerifyingKeyWithParam[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](nbPublicVariables, commitmentsLen, publicAndCommitmentCommitted)
+	batchProofPlaceHolder := regroth16.PlaceholderProofWithParam[sw_bn254.G1Affine, sw_bn254.G2Affine](commitmentsLen)
+	batchWitnessPlaceHolder := regroth16.PlaceholderWitnessWithParam[sw_bn254.ScalarField](nbPublicVariables)
+
+	return batchVkPlaceHolder, batchProofPlaceHolder, batchWitnessPlaceHolder
 }
