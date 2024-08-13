@@ -5,6 +5,7 @@ import (
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend/groth16"
+	bn254_groth16 "github.com/consensys/gnark/backend/groth16/bn254"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
@@ -33,11 +34,19 @@ func TestMiddleNode(t *testing.T) {
 	subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1 := GetLeafProof(assert, data)
 	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
+	log.Infof("get leaf done")
 
 	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
 	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
-	GetOneMiddleNodeProof(assert, subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2)
+	log.Infof("get middle 1 done")
+
+	_, subProof3, subVk3, subWitness3, _, _ := GetOneMiddleNodeProof(assert, subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2)
+	err = groth16.Verify(subProof3, subVk3, subWitness3, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	assert.NoError(err)
+
+	log.Infof("get middle 2 done")
+
 }
 
 func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSystem, innerProof groth16.Proof, innerVk groth16.VerifyingKey, innerWitness witness.Witness, innerMimcHash *big.Int, innerGPHash poseidon.GoldilocksHashOut) (constraint.ConstraintSystem, groth16.Proof, groth16.VerifyingKey, witness.Witness, *big.Int, poseidon.GoldilocksHashOut) {
@@ -125,7 +134,6 @@ func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSy
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	log.Infof("middle node prove done ccs: %d", ccs.GetNbConstraints())
-
+	log.Infof("middle node prove done ccs: %d, proof commitment: %d", ccs.GetNbConstraints(), len(proof.(*bn254_groth16.Proof).Commitments))
 	return ccs, proof, vk, pubWitness, circuitMimcHash, glHashout
 }
