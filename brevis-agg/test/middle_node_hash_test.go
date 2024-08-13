@@ -45,7 +45,7 @@ func TestMiddleNode(t *testing.T) {
 
 	ccsRe, err := goldilock_poseidon_agg.GetDummyMiddleNodeCcs()
 	assert.NoError(err)
-	subCcs1 = ccsRe
+	//subCcs1 = ccsRe
 
 	log.Infof("leaf ccs data2: proof size: %d", len(ccsRe.GetCommitments().(constraint.Groth16Commitments)))
 	log.Infof("leaf ccs data2: proof size: %d", ccsRe.GetNbPublicVariables()-1)
