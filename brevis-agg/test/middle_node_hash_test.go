@@ -47,21 +47,35 @@ func TestMiddleNode(t *testing.T) {
 	assert.NoError(err)
 	subCcs1 = ccsRe
 
-	log.Infof("leaf ccs data2: proof size: %d", len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
-	log.Infof("leaf ccs data2: proof size: %d", subCcs1.GetNbPublicVariables()-1)
-	log.Infof("leaf ccs data2: proof size: %d", subCcs1.GetNbPublicVariables()+len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
-	commitments = subCcs1.GetCommitments().(constraint.Groth16Commitments)
+	log.Infof("leaf ccs data2: proof size: %d", len(ccsRe.GetCommitments().(constraint.Groth16Commitments)))
+	log.Infof("leaf ccs data2: proof size: %d", ccsRe.GetNbPublicVariables()-1)
+	log.Infof("leaf ccs data2: proof size: %d", ccsRe.GetNbPublicVariables()+len(ccsRe.GetCommitments().(constraint.Groth16Commitments)))
+	commitments = ccsRe.GetCommitments().(constraint.Groth16Commitments)
 	commitmentWires = commitments.CommitmentIndexes()
-	log.Infof("leaf ccs data2: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs1.GetNbPublicVariables()))
+	log.Infof("leaf ccs data2: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, ccsRe.GetNbPublicVariables()))
 
 	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
 	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 	log.Infof("get middle 1 done")
 
-	_, subProof3, subVk3, subWitness3, _, _ := GetOneMiddleNodeProof(assert, subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2)
+	log.Infof("middle ccs data2: proof size: %d", len(subCcs2.GetCommitments().(constraint.Groth16Commitments)))
+	log.Infof("middle ccs data2: proof size: %d", subCcs2.GetNbPublicVariables()-1)
+	log.Infof("middle ccs data2: proof size: %d", subCcs2.GetNbPublicVariables()+len(subCcs2.GetCommitments().(constraint.Groth16Commitments)))
+	commitments = subCcs2.GetCommitments().(constraint.Groth16Commitments)
+	commitmentWires = commitments.CommitmentIndexes()
+	log.Infof("middle ccs data2: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs2.GetNbPublicVariables()))
+
+	subCcs3, subProof3, subVk3, subWitness3, _, _ := GetOneMiddleNodeProof(assert, subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2)
 	err = groth16.Verify(subProof3, subVk3, subWitness3, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
+
+	log.Infof("middle ccs data3: proof size: %d", len(subCcs3.GetCommitments().(constraint.Groth16Commitments)))
+	log.Infof("middle ccs data3: proof size: %d", subCcs3.GetNbPublicVariables()-1)
+	log.Infof("middle ccs data3: proof size: %d", subCcs3.GetNbPublicVariables()+len(subCcs3.GetCommitments().(constraint.Groth16Commitments)))
+	commitments = subCcs3.GetCommitments().(constraint.Groth16Commitments)
+	commitmentWires = commitments.CommitmentIndexes()
+	log.Infof("middle ccs data3: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs3.GetNbPublicVariables()))
 
 	log.Infof("get middle 2 done")
 
