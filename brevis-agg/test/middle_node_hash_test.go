@@ -34,7 +34,10 @@ func TestMiddleNode(t *testing.T) {
 	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
+	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
+	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	assert.NoError(err)
+	GetOneMiddleNodeProof(assert, subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2)
 }
 
 func GetOneMiddleNodeProof(assert *test.Assert, innerCcs constraint.ConstraintSystem, innerProof groth16.Proof, innerVk groth16.VerifyingKey, innerWitness witness.Witness, innerMimcHash *big.Int, innerGPHash poseidon.GoldilocksHashOut) (constraint.ConstraintSystem, groth16.Proof, groth16.VerifyingKey, witness.Witness, *big.Int, poseidon.GoldilocksHashOut) {
