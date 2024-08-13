@@ -36,9 +36,23 @@ func TestMiddleNode(t *testing.T) {
 	assert.NoError(err)
 	log.Infof("get leaf done")
 
+	log.Infof("leaf ccs data: proof size: %d", len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
+	log.Infof("leaf ccs data: proof size: %d", subCcs1.GetNbPublicVariables()-1)
+	log.Infof("leaf ccs data: proof size: %d", subCcs1.GetNbPublicVariables()+len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
+	commitments := subCcs1.GetCommitments().(constraint.Groth16Commitments)
+	commitmentWires := commitments.CommitmentIndexes()
+	log.Infof("leaf ccs data: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs1.GetNbPublicVariables()))
+
 	ccsRe, err := goldilock_poseidon_agg.GetDummyMiddleNodeCcs()
 	assert.NoError(err)
 	subCcs1 = ccsRe
+
+	log.Infof("leaf ccs data2: proof size: %d", len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
+	log.Infof("leaf ccs data2: proof size: %d", subCcs1.GetNbPublicVariables()-1)
+	log.Infof("leaf ccs data2: proof size: %d", subCcs1.GetNbPublicVariables()+len(subCcs1.GetCommitments().(constraint.Groth16Commitments)))
+	commitments = subCcs1.GetCommitments().(constraint.Groth16Commitments)
+	commitmentWires = commitments.CommitmentIndexes()
+	log.Infof("leaf ccs data2: proof size: %d", commitments.GetPublicAndCommitmentCommitted(commitmentWires, subCcs1.GetNbPublicVariables()))
 
 	subCcs2, subProof2, subVk2, subWitness2, mimc2, gl2 := GetOneMiddleNodeProof(assert, subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1)
 	err = groth16.Verify(subProof2, subVk2, subWitness2, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
