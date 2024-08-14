@@ -8,14 +8,19 @@ import (
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"github.com/consensys/gnark/logger"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/consensys/gnark/test"
+	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
+	"github.com/succinctlabs/gnark-plonky2-verifier/types"
 	tools "github.com/succinctlabs/gnark-plonky2-verifier/utils"
+	"github.com/succinctlabs/gnark-plonky2-verifier/variables"
 	"math/big"
+	"os"
 	"testing"
 )
 
@@ -215,11 +220,99 @@ func TestGenOneMiddleNode2(t *testing.T) {
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	err = utils.WriteProofIntoLocalFile(subProof1, "./proof/middle_from_middle_from_leaf_30.proof")
+	err = utils.WriteProofIntoLocalFile(proof, "./proof/middle_from_middle_from_leaf_30.proof")
 	assert.NoError(err)
-	err = utils.WriteVerifyingKey(subVk1, "./proof/middle_from_middle_from_leaf_30.vk")
+	err = utils.WriteVerifyingKey(vk, "./proof/middle_from_middle_from_leaf_30.vk")
 	assert.NoError(err)
-	err = utils.WriteWitness("./proof/middle_from_middle_from_leaf_30.witness", subWitness1)
+	err = utils.WriteWitness("./proof/middle_from_middle_from_leaf_30.witness", pubWitness)
+	assert.NoError(err)
+}
+
+func TestVerifyAllInAgg(t *testing.T) {
+	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
+	assert := test.NewAssert(t)
+	subProof1, err := tools.LoadProof("./proof/middle_from_middle_from_leaf_30.proof")
+	assert.NoError(err)
+	subVk1, err := tools.LoadVk("./proof/middle_from_middle_from_leaf_30.vk")
+	assert.NoError(err)
+	subWitness1, err := tools.LoadWitness("./proof/middle_from_middle_from_leaf_30.witness")
+	assert.NoError(err)
+	err = groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	assert.NoError(err)
+	log.Infof("get middle2 done")
+
+	var data []uint64
+	for i := 0; i < 30; i++ {
+		data = append(data, 2178309)
+	}
+	leafMimcHash, leafGlHash := GetLeafMimcGlHash(assert, data)
+	subMimcHash1, subGlHash1 := GetNextMimcGlHash(assert, leafMimcHash, leafGlHash)
+	circuitMimcHash, glHashout := GetNextMimcGlHash(assert, subMimcHash1, subGlHash1)
+
+	//log.Infof("subMimcHash1: %v", subMimcHash1)
+	log.Infof("circuitMimcHash: %v", circuitMimcHash)
+
+	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetMiddleNodeCircuitCcsPlaceHolder()
+
+	circuitVk1, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subVk1)
+	assert.NoError(err)
+	circuitWitness1, err := regroth16.ValueOfWitness[sw_bn254.ScalarField](subWitness1)
+	assert.NoError(err)
+	circuitProof1, err := regroth16.ValueOfProof[sw_bn254.G1Affine, sw_bn254.G2Affine](subProof1)
+	assert.NoError(err)
+
+	plonky2Circuit := "plonky023"
+	commonCircuitData := types.ReadCommonCircuitData("../../testdata/" + plonky2Circuit + "/common_circuit_data.json")
+	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("../../testdata/" + plonky2Circuit + "/proof_with_public_inputs.json"))
+	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData("../../testdata/" + plonky2Circuit + "/verifier_only_circuit_data.json"))
+
+	circuit := &goldilock_poseidon_agg.AggAllCircuit{
+		MimcHash:         circuitMimcHash,
+		GoldilockHashOut: glHashout,
+		HashProof:        proofPlaceholder1,
+		HashVerifyingKey: vkPlaceholder1,
+		HashInnerWitness: witnessPlaceholder1,
+
+		Plonky2Proof:                   proofWithPis.Proof,
+		Plonky2PublicInputs:            proofWithPis.PublicInputs,
+		Plonky2VerifierOnlyCircuitData: verifierOnlyCircuitData,
+		Plonky2CommonCircuitData:       commonCircuitData,
+	}
+
+	assigment := &goldilock_poseidon_agg.AggAllCircuit{
+		MimcHash:         circuitMimcHash,
+		GoldilockHashOut: glHashout,
+		HashProof:        circuitProof1,
+		HashVerifyingKey: circuitVk1,
+		HashInnerWitness: circuitWitness1,
+
+		Plonky2Proof:                   proofWithPis.Proof,
+		Plonky2PublicInputs:            proofWithPis.PublicInputs,
+		Plonky2VerifierOnlyCircuitData: verifierOnlyCircuitData,
+		Plonky2CommonCircuitData:       commonCircuitData,
+	}
+
+	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	log.Infof("solve done")
+
+	fullWitness, err := frontend.NewWitness(assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, circuit)
+	assert.NoError(err)
+
+	pk, vk, err := groth16.Setup(ccs)
+	assert.NoError(err)
+
+	pubWitness, err := fullWitness.Public()
+	assert.NoError(err)
+
+	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	assert.NoError(err)
+
+	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 }
 
