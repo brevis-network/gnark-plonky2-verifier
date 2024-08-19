@@ -184,10 +184,58 @@ func TestBenchMiddleNode(t *testing.T) {
 	assert.NoError(err)
 
 	time.Sleep(1 * time.Second)
-	testSize := 50
+	testSize := 16
 	var wg sync.WaitGroup
 	wg.Add(testSize)
 	startTime := time.Now()
+	for i := 0; i < testSize; i++ {
+		go func() {
+			defer wg.Done()
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
+		}()
+	}
+	wg.Wait()
+	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+
+	testSize = 8
+	wg.Add(testSize)
+	startTime = time.Now()
+	for i := 0; i < testSize; i++ {
+		go func() {
+			defer wg.Done()
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
+		}()
+	}
+	wg.Wait()
+	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+
+	testSize = 4
+	wg.Add(testSize)
+	startTime = time.Now()
+	for i := 0; i < testSize; i++ {
+		go func() {
+			defer wg.Done()
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
+		}()
+	}
+	wg.Wait()
+	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+
+	testSize = 2
+	wg.Add(testSize)
+	startTime = time.Now()
+	for i := 0; i < testSize; i++ {
+		go func() {
+			defer wg.Done()
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
+		}()
+	}
+	wg.Wait()
+	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+
+	testSize = 1
+	wg.Add(testSize)
+	startTime = time.Now()
 	for i := 0; i < testSize; i++ {
 		go func() {
 			defer wg.Done()
