@@ -1,7 +1,6 @@
 package goldilock_poseidon_agg
 
 import (
-	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	"github.com/consensys/gnark/std/hash/mimc"
@@ -46,7 +45,7 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 
 	mimcHashOutput := mimcHasher.Sum()
 	api.AssertIsEqual(mimcHashOutput, c.MimcHash)
-	log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
+	//log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
 
 	return nil
 }
