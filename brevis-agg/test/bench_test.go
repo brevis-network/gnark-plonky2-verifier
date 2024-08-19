@@ -4,6 +4,7 @@ import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
+	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
@@ -80,7 +81,7 @@ func TestBenchLeaf(t *testing.T) {
 	pk, vk, err := groth16.Setup(ccs)
 	assert.NoError(err)
 
-	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
 	assert.NoError(err)
 
 	time.Sleep(1 * time.Second)
@@ -91,7 +92,7 @@ func TestBenchLeaf(t *testing.T) {
 	for i := 0; i < testSize; i++ {
 		go func() {
 			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
 		}()
 	}
 	wg.Wait()
@@ -179,7 +180,7 @@ func TestBenchMiddleNode(t *testing.T) {
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
 
-	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
 	assert.NoError(err)
 
 	time.Sleep(1 * time.Second)
@@ -190,7 +191,7 @@ func TestBenchMiddleNode(t *testing.T) {
 	for i := 0; i < testSize; i++ {
 		go func() {
 			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
 		}()
 	}
 	wg.Wait()
