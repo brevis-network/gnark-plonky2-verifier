@@ -84,7 +84,7 @@ func TestBenchLeaf(t *testing.T) {
 	testSize := 100
 	var wg sync.WaitGroup
 	wg.Add(testSize)
-	log.Infof("start")
+	startTime := time.Now()
 	for i := 0; i < testSize; i++ {
 		go func() {
 			defer wg.Done()
@@ -92,7 +92,7 @@ func TestBenchLeaf(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	log.Infof("end")
+	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
 
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
