@@ -40,3 +40,35 @@ func TestGetOneGoldilockPoseidonHash(t *testing.T) {
 	assert.NoError(err)
 	log.Infof("res: %v", res)
 }
+
+func TestGetOneGoldilockPoseidonHash2(t *testing.T) {
+	assert := test.NewAssert(t)
+	data := []uint64{10934975891920367518, 4424308543009015085, 4179612347403588503, 9848538406279051766, 10934975891920367518, 4424308543009015085, 4179612347403588503, 9848538406279051766}
+
+	res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(data)
+	assert.NoError(err)
+	log.Infof("res: %v", res)
+
+	var data2 []gl.Variable
+	data2 = append(data2, res[:]...)
+	data2 = append(data2, res[:]...)
+	res, err = goldilock_poseidon_agg.GetGoldilockPoseidonHashByGl(data2)
+	assert.NoError(err)
+	log.Infof("res: %v", res)
+}
+
+func TestGetOneGoldilockPoseidonHash4(t *testing.T) {
+	assert := test.NewAssert(t)
+	data := []uint64{20539384}
+
+	res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(data)
+	assert.NoError(err)
+	log.Infof("res: %v", res)
+
+	var data2 []gl.Variable
+	data2 = append(data2, res[:]...)
+	data2 = append(data2, res[:]...)
+	res, err = goldilock_poseidon_agg.GetGoldilockPoseidonHashByGl(data2)
+	assert.NoError(err)
+	log.Infof("res: %v", res)
+}
