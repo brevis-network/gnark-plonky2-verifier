@@ -102,6 +102,8 @@ func TestBenchLeaf(t *testing.T) {
 }
 
 func TestBenchMiddleNode(t *testing.T) {
+	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
+
 	assert := test.NewAssert(t)
 
 	var data []uint64
