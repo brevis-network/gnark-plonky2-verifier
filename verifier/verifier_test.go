@@ -26,7 +26,8 @@ func TestStepVerifier(t *testing.T) {
 	//plonky2Circuit := "origin_recursion"
 	//plonky2Circuit := "plonky023"
 	//plonky2Circuit := "plonky2_agg_wrapper"
-	plonky2Circuit := "plonky022"
+	//plonky2Circuit := "plonky022"
+	plonky2Circuit := "test_receipts"
 	commonCircuitData := types.ReadCommonCircuitData("../testdata/" + plonky2Circuit + "/common_circuit_data.json")
 	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("../testdata/" + plonky2Circuit + "/proof_with_public_inputs.json"))
 	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData("../testdata/" + plonky2Circuit + "/verifier_only_circuit_data.json"))

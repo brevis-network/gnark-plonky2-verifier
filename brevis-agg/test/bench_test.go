@@ -33,10 +33,10 @@ func TestBenchLeaf(t *testing.T) {
 		datas = append(datas, 2178309)
 	}
 
-	var gldatas []gl.Variable
+	var gldatas [goldilock_poseidon_agg.LeafRawPubGlCount]gl.Variable
 	var mimcHashData []byte
 	for i := 0; i < len(datas); i++ {
-		gldatas = append(gldatas, gl.NewVariable(datas[i]))
+		gldatas[i] = gl.NewVariable(datas[i])
 		var mimcBlockBuf [mimc.BlockSize]byte
 		mimcHashData = append(mimcHashData, new(big.Int).SetUint64(datas[i]).FillBytes(mimcBlockBuf[:])...)
 	}
