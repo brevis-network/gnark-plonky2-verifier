@@ -49,7 +49,43 @@ hash: [
                     "value_index": 0,
                     "value": "0x00000000000000000000000000000000000000000000000000000574335d87c5",
                     "field_num_in_topics": 2
-                }
+                },
+                {
+                                    "contract_address": "0x961ad289351459a45fc90884ef3ab0278ea95dde",
+                                    "log_index": 0,
+                                    "log_topic0": "0xf6a97944f31ea060dfde0566e4167c1a1082551e64b60ecb14d599a9d023d451",
+                                    "value_from_topic": false,
+                                    "value_index": 0,
+                                    "value": "0x00000000000000000000000000000000000000000000000000000574335d87c5",
+                                    "field_num_in_topics": 2
+                                },
+                                {
+                                    "contract_address": "0x961ad289351459a45fc90884ef3ab0278ea95dde",
+                                    "log_index": 0,
+                                    "log_topic0": "0xf6a97944f31ea060dfde0566e4167c1a1082551e64b60ecb14d599a9d023d451",
+                                    "value_from_topic": false,
+                                    "value_index": 0,
+                                    "value": "0x00000000000000000000000000000000000000000000000000000574335d87c5",
+                                    "field_num_in_topics": 2
+                                },
+                                {
+                                    "contract_address": "0x961ad289351459a45fc90884ef3ab0278ea95dde",
+                                    "log_index": 0,
+                                    "log_topic0": "0xf6a97944f31ea060dfde0566e4167c1a1082551e64b60ecb14d599a9d023d451",
+                                    "value_from_topic": false,
+                                    "value_index": 0,
+                                    "value": "0x00000000000000000000000000000000000000000000000000000574335d87c5",
+                                    "field_num_in_topics": 2
+                                },
+                                {
+                                    "contract_address": "0x961ad289351459a45fc90884ef3ab0278ea95dde",
+                                    "log_index": 0,
+                                    "log_topic0": "0xf6a97944f31ea060dfde0566e4167c1a1082551e64b60ecb14d599a9d023d451",
+                                    "value_from_topic": false,
+                                    "value_index": 0,
+                                    "value": "0x00000000000000000000000000000000000000000000000000000574335d87c5",
+                                    "field_num_in_topics": 2
+                                }
             ],
             "blk_num": 13898775,
             "receipt_index": 3,
