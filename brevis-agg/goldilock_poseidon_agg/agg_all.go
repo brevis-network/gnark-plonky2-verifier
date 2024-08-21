@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
+	"github.com/consensys/gnark/std/algebra/native/sw_bls12377"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
+	replonk "github.com/consensys/gnark/std/recursion/plonk"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	"github.com/succinctlabs/gnark-plonky2-verifier/types"
@@ -34,9 +36,9 @@ type AggAllCircuit struct {
 	HashVerifyingKey regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]
 	HashInnerWitness regroth16.Witness[sw_bn254.ScalarField]
 
-	//CustomProof        replonk.Proof[sw_bls12377.ScalarField, sw_bls12377.G1Affine, sw_bls12377.G2Affine]
-	//CustomVerifyingKey replonk.VerifyingKey[sw_bls12377.ScalarField, sw_bls12377.G1Affine, sw_bls12377.G2Affine]
-	//CustomInnerWitness replonk.Witness[sw_bls12377.ScalarField]
+	CustomProof        replonk.Proof[sw_bls12377.ScalarField, sw_bls12377.G1Affine, sw_bls12377.G2Affine]
+	CustomVerifyingKey replonk.VerifyingKey[sw_bls12377.ScalarField, sw_bls12377.G1Affine, sw_bls12377.G2Affine]
+	CustomInnerWitness replonk.Witness[sw_bls12377.ScalarField]
 }
 
 func (c *AggAllCircuit) Define(api frontend.API) error {
@@ -81,6 +83,15 @@ func (c *AggAllCircuit) Define(api frontend.API) error {
 
 	verifierChip := plonky2verifier.NewVerifierChip(api, c.Plonky2CommonCircuitData)
 	verifierChip.Verify(c.Plonky2Proof, c.Plonky2PublicInputs, c.Plonky2VerifierOnlyCircuitData)
+
+	plonkVerifier, err := replonk.NewVerifier[sw_bls12377.ScalarField, sw_bls12377.G1Affine, sw_bls12377.G2Affine, sw_bls12377.GT](api)
+	if err != nil {
+		return err
+	}
+	err = plonkVerifier.AssertProof(c.CustomVerifyingKey, c.CustomProof, c.CustomInnerWitness)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

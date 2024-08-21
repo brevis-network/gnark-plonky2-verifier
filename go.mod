@@ -3,7 +3,7 @@ module github.com/succinctlabs/gnark-plonky2-verifier
 go 1.22
 
 require (
-	github.com/brevis-network/brevis-sdk v0.0.0-20240820112725-d1ab7739a854
+	github.com/brevis-network/brevis-sdk v0.0.0-20240821025939-d024e930f251
 	github.com/consensys/gnark v0.9.1
 	github.com/consensys/gnark-crypto v0.12.2-0.20240215234832-d72fcb379d3e
 	github.com/consensys/gnark-ignition-verifier v0.0.0-20230527014722-10693546ab33
