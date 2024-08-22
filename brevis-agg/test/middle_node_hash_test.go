@@ -31,7 +31,7 @@ func TestMiddleNode(t *testing.T) {
 	for i := 0; i < 30; i++ {
 		data = append(data, 2178309)
 	}
-	subCcs1, subProof1, subVk1, subWitness1, mimc1, gl1 := GetLeafProof(assert, data)
+	subCcs1, _, subProof1, subVk1, subWitness1, mimc1, gl1 := GetLeafProof(assert, data)
 	err := groth16.Verify(subProof1, subVk1, subWitness1, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 	log.Infof("get leaf done")

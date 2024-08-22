@@ -34,7 +34,7 @@ func TestLeafHashCircuit(t *testing.T) {
 	GetLeafProof(assert, data)
 }
 
-func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSystem, groth16.Proof, groth16.VerifyingKey, witness.Witness, *big.Int, poseidon.GoldilocksHashOut) {
+func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.Proof, groth16.VerifyingKey, witness.Witness, *big.Int, poseidon.GoldilocksHashOut) {
 	var gldatas [goldilock_poseidon_agg.LeafRawPubGlCount]gl.Variable
 	var mimcHashData []byte
 	for i := 0; i < len(datas); i++ {
@@ -128,7 +128,7 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 
 	log.Infof("leaf prove done ccs: %d, proof commitment: %d", ccs.GetNbConstraints(), len(proof.(*bn254_groth16.Proof).Commitments))
 
-	return ccs, proof, vk, pubWitness, leafs[0], glHash
+	return ccs, pk, proof, vk, pubWitness, leafs[0], glHash
 }
 
 func GetLeafMimcGlHash(assert *test.Assert, datas []uint64) (*big.Int, poseidon.GoldilocksHashOut) {

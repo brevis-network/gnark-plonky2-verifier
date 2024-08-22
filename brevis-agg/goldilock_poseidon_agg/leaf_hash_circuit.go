@@ -20,46 +20,33 @@ type LeafHashCircuit struct {
 }
 
 func (c *LeafHashCircuit) Define(api frontend.API) error {
+	// do goldilock hash
 	glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	output := poseidonGlChip.HashNoPad(c.RawData[:])
-
-	/*var placeholder []gl.Variable
-	for i := 0; i < 30; i++ {
-		placeholder = append(placeholder, gl.NewVariable(100))
-	}
-	for i := 0; i < 4; i++ {
-		poseidonGlChip.HashNoPad(placeholder)
-	}*/
-
 	// Check that output is correct
 	for i := 0; i < 4; i++ {
 		glAPI.AssertIsEqual(output[i], c.GoldilockHashOut[i])
 	}
 
+	// use
 	receipts := BuildReceiptFromGlData(api, c.RawData)
-
 	mimcHasher, err := mimc.NewMiMC(api)
 	if err != nil {
 		return err
 	}
-
-	var inputCommits []frontend.Variable
-	for _, receipt := range receipts {
+	var inputCommits [MaxReceiptPerLeaf]frontend.Variable
+	for x, receipt := range receipts {
 		packed := receipt.Pack(api)
-
 		/*log.Infof("in circuit hash %d", x)
 		for _, p := range packed {
 			log.Infof("in circuit hash: %x", p)
 		}*/
-
 		mimcHasher.Write(packed...)
 		sum := mimcHasher.Sum()
 		mimcHasher.Reset()
-
 		//log.Infof("in circuit receipt commitments %d: %x", x, sum)
-
-		inputCommits = append(inputCommits, sum)
+		inputCommits[x] = sum
 	}
 
 	inputCommitmentsRoot, err := calMerkelRoot(api, inputCommits)
@@ -75,25 +62,23 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func calMerkelRoot(api frontend.API, datas []frontend.Variable) (frontend.Variable, error) {
+func calMerkelRoot(api frontend.API, commitHash [MaxReceiptPerLeaf]frontend.Variable) (frontend.Variable, error) {
 	hasher, err := mimc.NewMiMC(api)
 	if err != nil {
 		return nil, err
 	}
-	elementCount := len(datas)
-	leafs := make([]frontend.Variable, elementCount)
-	copy(leafs, datas)
+	elementCount := MaxReceiptPerLeaf
 	for {
 		if elementCount == 1 {
-			log.Infof("in circuitnputCommitmentsRoot: %x", leafs[0])
-			return leafs[0], nil
+			log.Infof("in circuitnputCommitmentsRoot: %x", commitHash[0])
+			return commitHash[0], nil
 		}
 		log.Infof("calMerkelRoot with element size: %d", elementCount)
 		for i := 0; i < elementCount/2; i++ {
 			hasher.Reset()
-			hasher.Write(leafs[2*i])
-			hasher.Write(leafs[2*i+1])
-			leafs[i] = hasher.Sum()
+			hasher.Write(commitHash[2*i])
+			hasher.Write(commitHash[2*i+1])
+			commitHash[i] = hasher.Sum()
 		}
 		elementCount = elementCount / 2
 	}
