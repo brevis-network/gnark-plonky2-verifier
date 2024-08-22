@@ -45,7 +45,7 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 	}
 
 	var inputCommits []frontend.Variable
-	for x, receipt := range receipts {
+	for _, receipt := range receipts {
 		packed := receipt.Pack(api)
 
 		/*log.Infof("in circuit hash %d", x)
