@@ -21,6 +21,9 @@ var (
 )
 
 type LeafProveRequest struct {
+	RequestId string   `json:"request_id"`
+	LeafNum   uint64   `json:"leaf_num"` // num in array tree
+	RawData   []uint64 `json:"raw_data"` //1296
 }
 
 func main() {
