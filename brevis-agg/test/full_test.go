@@ -11,6 +11,7 @@ import (
 	"github.com/consensys/gnark/logger"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
+	replonk "github.com/consensys/gnark/std/recursion/plonk"
 	"github.com/consensys/gnark/test"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
@@ -240,16 +241,16 @@ func TestVerifyAllInAgg(t *testing.T) {
 	assert.NoError(err)
 	log.Infof("get middle2 done")
 
-	var data []uint64
+	/*var data []uint64
 	for i := 0; i < 30; i++ {
 		data = append(data, 2178309)
 	}
 	leafMimcHash, leafGlHash := GetLeafMimcGlHash(assert, data)
 	subMimcHash1, subGlHash1 := GetNextMimcGlHash(assert, leafMimcHash, leafGlHash)
-	circuitMimcHash, glHashout := GetNextMimcGlHash(assert, subMimcHash1, subGlHash1)
+	circuitMimcHash, _ := GetNextMimcGlHash(assert, subMimcHash1, subGlHash1)*/
 
 	//log.Infof("subMimcHash1: %v", subMimcHash1)
-	log.Infof("circuitMimcHash: %v", circuitMimcHash)
+	//log.Infof("circuitMimcHash: %v", circuitMimcHash)
 
 	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetMiddleNodeCircuitCcsPlaceHolder()
 
@@ -265,9 +266,19 @@ func TestVerifyAllInAgg(t *testing.T) {
 	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("../../testdata/" + plonky2Circuit + "/proof_with_public_inputs.json"))
 	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData("../../testdata/" + plonky2Circuit + "/verifier_only_circuit_data.json"))
 
+	pccs, pp, pvk, ppw, err := goldilock_poseidon_agg.GetCustomDummyProof()
+	assert.NoError(err)
+
+	repp, err := replonk.ValueOfProof[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine](pp)
+	assert.NoError(err)
+	repk, err := replonk.ValueOfVerifyingKey[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine](pvk)
+	assert.NoError(err)
+	reppw, err := replonk.ValueOfWitness[sw_bn254.ScalarField](ppw)
+	assert.NoError(err)
+
 	circuit := &goldilock_poseidon_agg.AggAllCircuit{
-		MimcHash:         circuitMimcHash,
-		GoldilockHashOut: glHashout,
+		//MimcHash:         circuitMimcHash,
+		//GoldilockHashOut: glHashout,
 		HashProof:        proofPlaceholder1,
 		HashVerifyingKey: vkPlaceholder1,
 		HashInnerWitness: witnessPlaceholder1,
@@ -276,11 +287,15 @@ func TestVerifyAllInAgg(t *testing.T) {
 		Plonky2PublicInputs:            proofWithPis.PublicInputs,
 		Plonky2VerifierOnlyCircuitData: verifierOnlyCircuitData,
 		Plonky2CommonCircuitData:       commonCircuitData,
+
+		CustomProof:        replonk.PlaceholderProof[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine](pccs),
+		CustomVerifyingKey: replonk.PlaceholderVerifyingKey[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine](pccs),
+		CustomInnerWitness: replonk.PlaceholderWitness[sw_bn254.ScalarField](pccs),
 	}
 
 	assigment := &goldilock_poseidon_agg.AggAllCircuit{
-		MimcHash:         circuitMimcHash,
-		GoldilockHashOut: glHashout,
+		//MimcHash:         circuitMimcHash,
+		//GoldilockHashOut: glHashout,
 		HashProof:        circuitProof1,
 		HashVerifyingKey: circuitVk1,
 		HashInnerWitness: circuitWitness1,
@@ -289,6 +304,10 @@ func TestVerifyAllInAgg(t *testing.T) {
 		Plonky2PublicInputs:            proofWithPis.PublicInputs,
 		Plonky2VerifierOnlyCircuitData: verifierOnlyCircuitData,
 		Plonky2CommonCircuitData:       commonCircuitData,
+
+		CustomProof:        repp,
+		CustomVerifyingKey: repk,
+		CustomInnerWitness: reppw,
 	}
 
 	err = test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
@@ -307,6 +326,10 @@ func TestVerifyAllInAgg(t *testing.T) {
 
 	pubWitness, err := fullWitness.Public()
 	assert.NoError(err)
+
+	for i := 0; i < 5; i++ {
+		groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
+	}
 
 	proof, err := groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
