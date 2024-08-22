@@ -202,7 +202,7 @@ func TestBenchMiddleNode(t *testing.T) {
 				}()
 			}
 			wg.Wait()
-			log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+			log.Infof("%d end cost: %d ms", testSize, time.Until(startTime).Milliseconds())
 		}
 	}
 
