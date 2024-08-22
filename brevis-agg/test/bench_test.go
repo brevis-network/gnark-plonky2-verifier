@@ -190,10 +190,11 @@ func TestBenchMiddleNode(t *testing.T) {
 
 	for y := 0; y < 2; y++ {
 		time.Sleep(1 * time.Second)
+		testSize := 2
 		for x := 1; x < 10; x++ {
 			var wg sync.WaitGroup
 			time.Sleep(1 * time.Second)
-			testSize := x * 10
+			testSize = testSize * 2
 			wg.Add(testSize)
 			startTime := time.Now()
 			for i := 0; i < testSize; i++ {
