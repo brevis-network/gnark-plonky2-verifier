@@ -15,6 +15,7 @@ require (
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/VictoriaMetrics/fastcache v1.12.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cbergoon/merkletree v0.2.0 // indirect
@@ -100,3 +101,5 @@ require (
 )
 
 replace github.com/consensys/gnark => github.com/celer-network/gnark v0.1.1-0.20240819072344-611a1f50d4c2
+
+replace github.com/ethereum/go-ethereum v1.13.15 => github.com/ethereum/go-ethereum v1.13.8
