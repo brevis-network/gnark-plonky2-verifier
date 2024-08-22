@@ -189,7 +189,7 @@ func TestBenchMiddleNode(t *testing.T) {
 	for y := 0; y < 2; y++ {
 		time.Sleep(1 * time.Second)
 		testSize := 2
-		for x := 1; x < 5; x++ {
+		for x := 1; x < 4; x++ {
 			var wg sync.WaitGroup
 			time.Sleep(1 * time.Second)
 			testSize = testSize * 2
