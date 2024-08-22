@@ -83,7 +83,7 @@ func TestBenchLeaf(t *testing.T) {
 	assert.NoError(err)
 
 	for y := 0; y < 2; y++ {
-		for x := 1; x < 10; x++ {
+		for x := 1; x < 6; x++ {
 			time.Sleep(1 * time.Second)
 			testSize := x * 10
 			var wg sync.WaitGroup
@@ -186,66 +186,25 @@ func TestBenchMiddleNode(t *testing.T) {
 	assert.NoError(err)
 
 	time.Sleep(1 * time.Second)
-	testSize := 16
-	var wg sync.WaitGroup
-	wg.Add(testSize)
-	startTime := time.Now()
-	for i := 0; i < testSize; i++ {
-		go func() {
-			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
-		}()
-	}
-	wg.Wait()
-	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
 
-	testSize = 8
-	wg.Add(testSize)
-	startTime = time.Now()
-	for i := 0; i < testSize; i++ {
-		go func() {
-			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
-		}()
+	for y := 0; y < 2; y++ {
+		time.Sleep(1 * time.Second)
+		for x := 1; x < 10; x++ {
+			var wg sync.WaitGroup
+			time.Sleep(1 * time.Second)
+			testSize := x * 10
+			wg.Add(testSize)
+			startTime := time.Now()
+			for i := 0; i < testSize; i++ {
+				go func() {
+					defer wg.Done()
+					groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
+				}()
+			}
+			wg.Wait()
+			log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
+		}
 	}
-	wg.Wait()
-	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
-
-	testSize = 4
-	wg.Add(testSize)
-	startTime = time.Now()
-	for i := 0; i < testSize; i++ {
-		go func() {
-			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
-		}()
-	}
-	wg.Wait()
-	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
-
-	testSize = 2
-	wg.Add(testSize)
-	startTime = time.Now()
-	for i := 0; i < testSize; i++ {
-		go func() {
-			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
-		}()
-	}
-	wg.Wait()
-	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
-
-	testSize = 1
-	wg.Add(testSize)
-	startTime = time.Now()
-	for i := 0; i < testSize; i++ {
-		go func() {
-			defer wg.Done()
-			groth16.Prove(ccs, pk, fullWitness, regroth16.GetNativeProverOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()), backend.WithIcicleAcceleration(), backend.WithMultiGpuSelect([]int{0, 0, 0, 0, 0}))
-		}()
-	}
-	wg.Wait()
-	log.Infof("end cost: %d ms", time.Until(startTime).Milliseconds())
 
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
