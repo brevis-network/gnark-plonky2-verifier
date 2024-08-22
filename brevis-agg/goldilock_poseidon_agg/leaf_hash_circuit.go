@@ -57,7 +57,7 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 		sum := mimcHasher.Sum()
 		mimcHasher.Reset()
 
-		log.Infof("in circuit receipt commitments %d: %x", x, sum)
+		//log.Infof("in circuit receipt commitments %d: %x", x, sum)
 
 		inputCommits = append(inputCommits, sum)
 	}
@@ -67,7 +67,7 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 		return err
 	}
 
-	log.Infof("inputCommitmentsRoot: %x", inputCommitmentsRoot)
+	//log.Infof("inputCommitmentsRoot: %x", inputCommitmentsRoot)
 
 	api.AssertIsEqual(inputCommitmentsRoot, c.MimcHash)
 	//log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
