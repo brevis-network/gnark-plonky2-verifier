@@ -83,9 +83,10 @@ func TestBenchLeaf(t *testing.T) {
 	assert.NoError(err)
 
 	for y := 0; y < 2; y++ {
+		testSize := 2
 		for x := 1; x < 6; x++ {
 			time.Sleep(1 * time.Second)
-			testSize := x * 10
+			testSize = testSize * 2
 			var wg sync.WaitGroup
 			wg.Add(testSize)
 			startTime := time.Now()
