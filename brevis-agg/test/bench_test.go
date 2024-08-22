@@ -83,8 +83,8 @@ func TestBenchLeaf(t *testing.T) {
 	assert.NoError(err)
 
 	for y := 0; y < 2; y++ {
-		testSize := 2
-		for x := 1; x < 6; x++ {
+		testSize := 1
+		for x := 1; x < 7; x++ {
 			time.Sleep(1 * time.Second)
 			testSize = testSize * 2
 			var wg sync.WaitGroup
@@ -188,8 +188,8 @@ func TestBenchMiddleNode(t *testing.T) {
 
 	for y := 0; y < 2; y++ {
 		time.Sleep(1 * time.Second)
-		testSize := 2
-		for x := 1; x < 4; x++ {
+		testSize := 1
+		for x := 1; x < 5; x++ {
 			var wg sync.WaitGroup
 			time.Sleep(1 * time.Second)
 			testSize = testSize * 2
