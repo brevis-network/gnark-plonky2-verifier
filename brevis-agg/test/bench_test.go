@@ -12,6 +12,7 @@ import (
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/consensys/gnark/test"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
@@ -29,8 +30,8 @@ func TestBenchLeaf(t *testing.T) {
 
 	assert := test.NewAssert(t)
 	var datas []uint64
-	for i := 0; i < 1296; i++ {
-		datas = append(datas, 2178309)
+	for i := 0; i < goldilock_poseidon_agg.LeafRawPubGlCount; i++ {
+		datas = append(datas, 0)
 	}
 
 	var gldatas [goldilock_poseidon_agg.LeafRawPubGlCount]gl.Variable
@@ -41,17 +42,14 @@ func TestBenchLeaf(t *testing.T) {
 		mimcHashData = append(mimcHashData, new(big.Int).SetUint64(datas[i]).FillBytes(mimcBlockBuf[:])...)
 	}
 
-	mimcHasher := mimc.NewMiMC()
-	_, err := mimcHasher.Write(mimcHashData)
-	assert.NoError(err)
-	mimcHash := mimcHasher.Sum(nil)
+	mimcHash := new(big.Int).SetBytes(common.Hex2Bytes("2e8b362edd870a14dd6ffe10be6e42d87718036538edf740abe5104924685f77"))
 
 	glHash, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(datas)
 	assert.NoError(err)
 	log.Infof("glHash: %v", glHash)
 	log.Infof("mimc: %x", mimcHash)
 
-	circuitMimcHash := new(big.Int).SetBytes(mimcHash)
+	circuitMimcHash := mimcHash
 
 	circuit := &goldilock_poseidon_agg.LeafHashCircuit{
 		RawData:          gldatas,
