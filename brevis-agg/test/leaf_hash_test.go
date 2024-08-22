@@ -43,27 +43,64 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 		mimcHashData = append(mimcHashData, new(big.Int).SetUint64(datas[i]).FillBytes(mimcBlockBuf[:])...)
 	}
 
-	mimcHasher := mimc_bn254.NewMiMC()
-	_, err := mimcHasher.Write(mimcHashData)
-	assert.NoError(err)
-	mimcHash := mimcHasher.Sum(nil)
-
 	glHash, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(datas)
 	assert.NoError(err)
 	log.Infof("glHash: %v", glHash)
-	log.Infof("mimc: %x", mimcHash)
 
-	circuitMimcHash := new(big.Int).SetBytes(mimcHash)
+	receipts, err := goldilock_poseidon_agg.GetLeafReceipts(datas)
+	assert.NoError(err)
+	leafs := make([]*big.Int, goldilock_poseidon_agg.MaxReceiptPerLeaf)
+	hasher := mimc_bn254.NewMiMC()
+
+	for i, receipt := range receipts {
+		//log.Infof("xx eventId: %x", sdk.ConstUint248(receipt.Fields[0].EventID[:6]).Val)
+		receiptInput := sdk.Receipt{
+			BlockNum: sdk.Uint248{Val: receipt.BlockNum},
+			Fields:   sdk.BuildLogFields(receipt.Fields),
+		}
+
+		//log.Infof("start write one receipt %d", i)
+		for _, v := range receiptInput.GoPack() {
+			//log.Infof("write: %x", common.LeftPadBytes(v.Bytes(), 32))
+			hasher.Write(common.LeftPadBytes(v.Bytes(), 32))
+		}
+
+		leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		//log.Infof("leaf %d: %x", i, leafs[i])
+		hasher.Reset()
+	}
+
+	var inputCommitmentsRoot frontend.Variable
+	elementCount := len(leafs)
+	for {
+		if elementCount == 1 {
+			inputCommitmentsRoot = leafs[0]
+			log.Infof("w.InputCommitmentsRoot: %x", inputCommitmentsRoot)
+			break
+		}
+		log.Infof("calMerkelRoot(no circuit) with element size: %d", elementCount)
+		for i := 0; i < elementCount/2; i++ {
+			var mimcBlockBuf0, mimcBlockBuf1 [mimc_bn254.BlockSize]byte
+			leafs[2*i].FillBytes(mimcBlockBuf0[:])
+			leafs[2*i+1].FillBytes(mimcBlockBuf1[:])
+			hasher.Reset()
+			hasher.Write(mimcBlockBuf0[:])
+			hasher.Write(mimcBlockBuf1[:])
+			leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		}
+		elementCount = elementCount / 2
+	}
+	log.Infof("mimc: %x", inputCommitmentsRoot)
 
 	circuit := &goldilock_poseidon_agg.LeafHashCircuit{
 		RawData:          gldatas,
-		MimcHash:         circuitMimcHash,
+		MimcHash:         inputCommitmentsRoot,
 		GoldilockHashOut: glHash,
 	}
 
 	assigment := &goldilock_poseidon_agg.LeafHashCircuit{
 		RawData:          gldatas,
-		MimcHash:         circuitMimcHash,
+		MimcHash:         inputCommitmentsRoot,
 		GoldilockHashOut: glHash,
 	}
 
@@ -91,7 +128,7 @@ func GetLeafProof(assert *test.Assert, datas []uint64) (constraint.ConstraintSys
 
 	log.Infof("leaf prove done ccs: %d, proof commitment: %d", ccs.GetNbConstraints(), len(proof.(*bn254_groth16.Proof).Commitments))
 
-	return ccs, proof, vk, pubWitness, circuitMimcHash, glHash
+	return ccs, proof, vk, pubWitness, leafs[0], glHash
 }
 
 func GetLeafMimcGlHash(assert *test.Assert, datas []uint64) (*big.Int, poseidon.GoldilocksHashOut) {
@@ -103,19 +140,57 @@ func GetLeafMimcGlHash(assert *test.Assert, datas []uint64) (*big.Int, poseidon.
 		mimcHashData = append(mimcHashData, new(big.Int).SetUint64(datas[i]).FillBytes(mimcBlockBuf[:])...)
 	}
 
-	mimcHasher := mimc_bn254.NewMiMC()
-	_, err := mimcHasher.Write(mimcHashData)
+	receipts, err := goldilock_poseidon_agg.GetLeafReceipts(datas)
 	assert.NoError(err)
-	mimcHash := mimcHasher.Sum(nil)
+	leafs := make([]*big.Int, goldilock_poseidon_agg.MaxReceiptPerLeaf)
+	hasher := mimc_bn254.NewMiMC()
+
+	for i, receipt := range receipts {
+		//log.Infof("xx eventId: %x", sdk.ConstUint248(receipt.Fields[0].EventID[:6]).Val)
+		receiptInput := sdk.Receipt{
+			BlockNum: sdk.Uint248{Val: receipt.BlockNum},
+			Fields:   sdk.BuildLogFields(receipt.Fields),
+		}
+
+		//log.Infof("start write one receipt %d", i)
+		for _, v := range receiptInput.GoPack() {
+			//log.Infof("write: %x", common.LeftPadBytes(v.Bytes(), 32))
+			hasher.Write(common.LeftPadBytes(v.Bytes(), 32))
+		}
+
+		leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		//log.Infof("leaf %d: %x", i, leafs[i])
+		hasher.Reset()
+	}
+
+	var inputCommitmentsRoot frontend.Variable
+	elementCount := len(leafs)
+	for {
+		if elementCount == 1 {
+			inputCommitmentsRoot = leafs[0]
+			log.Infof("w.InputCommitmentsRoot: %x", inputCommitmentsRoot)
+			break
+		}
+		log.Infof("calMerkelRoot(no circuit) with element size: %d", elementCount)
+		for i := 0; i < elementCount/2; i++ {
+			var mimcBlockBuf0, mimcBlockBuf1 [mimc_bn254.BlockSize]byte
+			leafs[2*i].FillBytes(mimcBlockBuf0[:])
+			leafs[2*i+1].FillBytes(mimcBlockBuf1[:])
+			hasher.Reset()
+			hasher.Write(mimcBlockBuf0[:])
+			hasher.Write(mimcBlockBuf1[:])
+			leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		}
+		elementCount = elementCount / 2
+	}
+	log.Infof("mimc: %x", inputCommitmentsRoot)
 
 	glHash, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(datas)
 	assert.NoError(err)
 	log.Infof("glHash: %v", glHash)
-	log.Infof("mimc: %x", mimcHash)
+	log.Infof("mimc: %x", inputCommitmentsRoot)
 
-	circuitMimcHash := new(big.Int).SetBytes(mimcHash)
-
-	return circuitMimcHash, glHash
+	return leafs[0], glHash
 }
 
 func TestLeafHashCircuit2(t *testing.T) {
