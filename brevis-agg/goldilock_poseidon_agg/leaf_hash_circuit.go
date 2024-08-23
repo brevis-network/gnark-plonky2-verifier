@@ -99,7 +99,7 @@ func GetLeafCircuitCcsPlaceHolder() (regroth16.VerifyingKey[sw_bn254.G1Affine, s
 }
 
 const LeafRawPubGlCount = MaxReceiptPerLeaf * GlCountPerReceipt
-const MaxReceiptPerLeaf = 16
+const MaxReceiptPerLeaf = 32
 const GlCountPerReceipt = GlCountPerReceiptLog*sdk.NumMaxLogFields + 1 // +1 is blk num
 const GlCountPerReceiptLog = 10
 
