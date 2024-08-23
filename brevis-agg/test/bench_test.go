@@ -3,7 +3,6 @@ package test
 import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
@@ -12,13 +11,11 @@ import (
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/consensys/gnark/test"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	tools "github.com/succinctlabs/gnark-plonky2-verifier/utils"
-	"math/big"
 	"os"
 	"sync"
 	"testing"
@@ -30,19 +27,14 @@ func TestBenchLeaf(t *testing.T) {
 
 	assert := test.NewAssert(t)
 	var datas []uint64
+	var gldatas [goldilock_poseidon_agg.LeafRawPubGlCount]gl.Variable
 	for i := 0; i < goldilock_poseidon_agg.LeafRawPubGlCount; i++ {
 		datas = append(datas, 0)
+		gldatas[i] = gl.NewVariable(0)
 	}
 
-	var gldatas [goldilock_poseidon_agg.LeafRawPubGlCount]gl.Variable
-	var mimcHashData []byte
-	for i := 0; i < len(datas); i++ {
-		gldatas[i] = gl.NewVariable(datas[i])
-		var mimcBlockBuf [mimc.BlockSize]byte
-		mimcHashData = append(mimcHashData, new(big.Int).SetUint64(datas[i]).FillBytes(mimcBlockBuf[:])...)
-	}
-
-	mimcHash := new(big.Int).SetBytes(common.Hex2Bytes("2e8b362edd870a14dd6ffe10be6e42d87718036538edf740abe5104924685f77"))
+	mimcHash, err := goldilock_poseidon_agg.GetLeafMimcHash(datas[:])
+	assert.NoError(err)
 
 	glHash, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(datas)
 	assert.NoError(err)
