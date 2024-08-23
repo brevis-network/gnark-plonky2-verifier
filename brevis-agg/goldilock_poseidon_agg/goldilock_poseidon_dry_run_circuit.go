@@ -29,12 +29,10 @@ func (c *GoldilockPoseidonDryRunCircuit) Define(api frontend.API) error {
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 
 	var placeholder []gl.Variable
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 129-len(c.RawData); i++ {
 		placeholder = append(placeholder, gl.NewVariable(100))
 	}
-	for i := 0; i < 4; i++ {
-		poseidonGlChip.HashNoPad(placeholder)
-	}
+	poseidonGlChip.HashNoPad(placeholder)
 
 	output := poseidonGlChip.HashNoPad(c.RawData)
 	log.Infof("dry run gp hash result %v", output)

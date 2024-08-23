@@ -8,7 +8,6 @@ require (
 	github.com/consensys/gnark-crypto v0.12.2-0.20240215234832-d72fcb379d3e
 	github.com/consensys/gnark-ignition-verifier v0.0.0-20230527014722-10693546ab33
 	github.com/ethereum/go-ethereum v1.13.15
-	github.com/labstack/echo/v4 v4.9.0
 )
 
 require (
@@ -49,7 +48,6 @@ require (
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -65,8 +63,6 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
