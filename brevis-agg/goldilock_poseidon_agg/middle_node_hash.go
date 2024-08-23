@@ -2,6 +2,7 @@ package goldilock_poseidon_agg
 
 import (
 	"fmt"
+	mimc_bn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	"github.com/consensys/gnark/std/hash/mimc"
@@ -97,4 +98,30 @@ func GetMiddleNodeCircuitCcsPlaceHolder() (regroth16.VerifyingKey[sw_bn254.G1Aff
 	batchWitnessPlaceHolder := regroth16.PlaceholderWitnessWithParam[sw_bn254.ScalarField](nbPublicVariables)
 
 	return batchVkPlaceHolder, batchProofPlaceHolder, batchWitnessPlaceHolder
+}
+
+func GetNextMimcGlHash(subMimcHash *big.Int, subGlHash poseidon.GoldilocksHashOut) (*big.Int, poseidon.GoldilocksHashOut, error) {
+	mimcHasher := mimc_bn254.NewMiMC()
+	var mimcHashData []byte
+
+	var mimcBlockBuf [mimc_bn254.BlockSize]byte
+	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
+	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
+	_, err := mimcHasher.Write(mimcHashData)
+	if err != nil {
+		return nil, poseidon.GoldilocksHashOut{}, err
+	}
+
+	mimcHashOut := mimcHasher.Sum(nil)
+	circuitMimcHash := new(big.Int).SetBytes(mimcHashOut)
+
+	var glPreimage []gl.Variable
+	glPreimage = append(glPreimage, subGlHash[:]...)
+	glPreimage = append(glPreimage, subGlHash[:]...)
+	glHashout, err := GetGoldilockPoseidonHashByGl(glPreimage)
+	if err != nil {
+		return nil, poseidon.GoldilocksHashOut{}, err
+	}
+
+	return circuitMimcHash, glHashout, err
 }

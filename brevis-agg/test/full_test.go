@@ -5,7 +5,6 @@ import (
 	"github.com/celer-network/goutils/log"
 	"github.com/consensys/gnark-crypto/ecc"
 	bn254_fr "github.com/consensys/gnark-crypto/ecc/bn254/fr"
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
@@ -16,7 +15,6 @@ import (
 	"github.com/consensys/gnark/test"
 	"github.com/rs/zerolog"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
-	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	"github.com/succinctlabs/gnark-plonky2-verifier/types"
 	tools "github.com/succinctlabs/gnark-plonky2-verifier/utils"
@@ -65,7 +63,8 @@ func TestGenOneMiddleNode(t *testing.T) {
 
 	subMimcHash, subGlHash := GetLeafMimcGlHash(assert, data)
 
-	circuitMimcHash, glHashout := GetNextMimcGlHash(assert, subMimcHash, subGlHash)
+	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash, subGlHash)
+	assert.NoError(err)
 
 	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetLeafCircuitCcsPlaceHolder()
 	vkPlaceholder2, proofPlaceholder2, witnessPlaceholder2 := goldilock_poseidon_agg.GetLeafCircuitCcsPlaceHolder()
@@ -154,8 +153,10 @@ func TestGenOneMiddleNode2(t *testing.T) {
 	}
 
 	leafMimcHash, leafGlHash := GetLeafMimcGlHash(assert, data)
-	subMimcHash1, subGlHash1 := GetNextMimcGlHash(assert, leafMimcHash, leafGlHash)
-	circuitMimcHash, glHashout := GetNextMimcGlHash(assert, subMimcHash1, subGlHash1)
+	subMimcHash1, subGlHash1, err := goldilock_poseidon_agg.GetNextMimcGlHash(leafMimcHash, leafGlHash)
+	assert.NoError(err)
+	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash1, subGlHash1)
+	assert.NoError(err)
 
 	log.Infof("subMimcHash1: %v", subMimcHash1)
 	log.Infof("circuitMimcHash: %v", circuitMimcHash)
@@ -339,28 +340,6 @@ func TestVerifyAllInAgg(t *testing.T) {
 	assert.NoError(err)
 }
 
-func GetNextMimcGlHash(assert *test.Assert, subMimcHash *big.Int, subGlHash poseidon.GoldilocksHashOut) (*big.Int, poseidon.GoldilocksHashOut) {
-	mimcHasher := mimc.NewMiMC()
-	var mimcHashData []byte
-
-	var mimcBlockBuf [mimc.BlockSize]byte
-	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
-	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
-	_, err := mimcHasher.Write(mimcHashData)
-	assert.NoError(err)
-
-	mimcHashOut := mimcHasher.Sum(nil)
-	circuitMimcHash := new(big.Int).SetBytes(mimcHashOut)
-
-	var glPreimage []gl.Variable
-	glPreimage = append(glPreimage, subGlHash[:]...)
-	glPreimage = append(glPreimage, subGlHash[:]...)
-	glHashout, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByGl(glPreimage)
-	assert.NoError(err)
-
-	return circuitMimcHash, glHashout
-}
-
 func TestGetHashFromWitness(t *testing.T) {
 	logger.Set(zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}).With().Timestamp().Logger())
 
@@ -383,6 +362,7 @@ func TestGetHashFromWitness(t *testing.T) {
 	for x, wf := range subWitness1.Vector().(bn254_fr.Vector) {
 		if x == 0 {
 			log.Infof("%d, %x", x, wf.Bytes())
+			log.Infof("%d, %x", x, wf.BigInt(new(big.Int)).Bytes())
 		} else {
 			log.Infof("%d, %d", x, wf.Uint64())
 		}
