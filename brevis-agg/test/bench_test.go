@@ -84,7 +84,7 @@ func TestBenchLeaf(t *testing.T) {
 
 	for y := 0; y < 2; y++ {
 		testSize := 1
-		for x := 1; x < 7; x++ {
+		for x := 1; x < 6; x++ {
 			time.Sleep(5 * time.Second)
 			testSize = testSize * 2
 			var wg sync.WaitGroup

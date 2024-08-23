@@ -3,10 +3,12 @@ package goldilock_poseidon_agg
 import (
 	"github.com/brevis-network/brevis-sdk/sdk"
 	"github.com/celer-network/goutils/log"
+	mimc_bn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
 	"github.com/consensys/gnark/std/hash/mimc"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
+	"github.com/ethereum/go-ethereum/common"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
 	"math/big"
@@ -186,3 +188,53 @@ func BuildCircuitLogValue(api frontend.API, data [GlValueLen]gl.Variable) sdk.By
 }
 
 var numBitsPerVar = 248
+
+func GetLeafMimcHash(datas []uint64) (*big.Int, error) {
+	receipts, err := GetLeafReceipts(datas)
+	if err != nil {
+		return nil, err
+	}
+	leafs := make([]*big.Int, MaxReceiptPerLeaf)
+	hasher := mimc_bn254.NewMiMC()
+
+	for i, receipt := range receipts {
+		//log.Infof("xx eventId: %x", sdk.ConstUint248(receipt.Fields[0].EventID[:6]).Val)
+		receiptInput := sdk.Receipt{
+			BlockNum: sdk.Uint248{Val: receipt.BlockNum},
+			Fields:   sdk.BuildLogFields(receipt.Fields),
+		}
+
+		//log.Infof("start write one receipt %d", i)
+		for _, v := range receiptInput.GoPack() {
+			//log.Infof("write: %x", common.LeftPadBytes(v.Bytes(), 32))
+			hasher.Write(common.LeftPadBytes(v.Bytes(), 32))
+		}
+
+		leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		//log.Infof("leaf %d: %x", i, leafs[i])
+		hasher.Reset()
+	}
+
+	var inputCommitmentsRoot frontend.Variable
+	elementCount := len(leafs)
+	for {
+		if elementCount == 1 {
+			inputCommitmentsRoot = leafs[0]
+			log.Infof("w.InputCommitmentsRoot: %x", inputCommitmentsRoot)
+			break
+		}
+		log.Infof("calMerkelRoot(no circuit) with element size: %d", elementCount)
+		for i := 0; i < elementCount/2; i++ {
+			var mimcBlockBuf0, mimcBlockBuf1 [mimc_bn254.BlockSize]byte
+			leafs[2*i].FillBytes(mimcBlockBuf0[:])
+			leafs[2*i+1].FillBytes(mimcBlockBuf1[:])
+			hasher.Reset()
+			hasher.Write(mimcBlockBuf0[:])
+			hasher.Write(mimcBlockBuf1[:])
+			leafs[i] = new(big.Int).SetBytes(hasher.Sum(nil))
+		}
+		elementCount = elementCount / 2
+	}
+	log.Infof("mimc: %x", inputCommitmentsRoot)
+	return leafs[0], nil
+}
