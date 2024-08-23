@@ -124,7 +124,7 @@ func TestBenchMiddleNode(t *testing.T) {
 
 	subMimcHash, subGlHash := GetLeafMimcGlHash(assert, data)
 
-	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash, subGlHash)
+	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash, subMimcHash, subGlHash, subGlHash)
 	assert.NoError(err)
 
 	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetLeafCircuitCcsPlaceHolder()

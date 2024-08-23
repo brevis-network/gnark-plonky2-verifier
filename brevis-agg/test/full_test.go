@@ -63,7 +63,7 @@ func TestGenOneMiddleNode(t *testing.T) {
 
 	subMimcHash, subGlHash := GetLeafMimcGlHash(assert, data)
 
-	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash, subGlHash)
+	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash, subMimcHash, subGlHash, subGlHash)
 	assert.NoError(err)
 
 	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetLeafCircuitCcsPlaceHolder()
@@ -153,9 +153,9 @@ func TestGenOneMiddleNode2(t *testing.T) {
 	}
 
 	leafMimcHash, leafGlHash := GetLeafMimcGlHash(assert, data)
-	subMimcHash1, subGlHash1, err := goldilock_poseidon_agg.GetNextMimcGlHash(leafMimcHash, leafGlHash)
+	subMimcHash1, subGlHash1, err := goldilock_poseidon_agg.GetNextMimcGlHash(leafMimcHash, leafMimcHash, leafGlHash, leafGlHash)
 	assert.NoError(err)
-	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash1, subGlHash1)
+	circuitMimcHash, glHashout, err := goldilock_poseidon_agg.GetNextMimcGlHash(subMimcHash1, subMimcHash1, subGlHash1, subGlHash1)
 	assert.NoError(err)
 
 	log.Infof("subMimcHash1: %v", subMimcHash1)

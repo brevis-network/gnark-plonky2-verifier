@@ -100,13 +100,13 @@ func GetMiddleNodeCircuitCcsPlaceHolder() (regroth16.VerifyingKey[sw_bn254.G1Aff
 	return batchVkPlaceHolder, batchProofPlaceHolder, batchWitnessPlaceHolder
 }
 
-func GetNextMimcGlHash(subMimcHash *big.Int, subGlHash poseidon.GoldilocksHashOut) (*big.Int, poseidon.GoldilocksHashOut, error) {
+func GetNextMimcGlHash(subMimcHash1, subMimcHash2 *big.Int, subGlHash1, subGlHash2 poseidon.GoldilocksHashOut) (*big.Int, poseidon.GoldilocksHashOut, error) {
 	mimcHasher := mimc_bn254.NewMiMC()
 	var mimcHashData []byte
 
 	var mimcBlockBuf [mimc_bn254.BlockSize]byte
-	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
-	mimcHashData = append(mimcHashData, subMimcHash.FillBytes(mimcBlockBuf[:])...)
+	mimcHashData = append(mimcHashData, subMimcHash1.FillBytes(mimcBlockBuf[:])...)
+	mimcHashData = append(mimcHashData, subMimcHash2.FillBytes(mimcBlockBuf[:])...)
 	_, err := mimcHasher.Write(mimcHashData)
 	if err != nil {
 		return nil, poseidon.GoldilocksHashOut{}, err
@@ -116,8 +116,8 @@ func GetNextMimcGlHash(subMimcHash *big.Int, subGlHash poseidon.GoldilocksHashOu
 	circuitMimcHash := new(big.Int).SetBytes(mimcHashOut)
 
 	var glPreimage []gl.Variable
-	glPreimage = append(glPreimage, subGlHash[:]...)
-	glPreimage = append(glPreimage, subGlHash[:]...)
+	glPreimage = append(glPreimage, subGlHash1[:]...)
+	glPreimage = append(glPreimage, subGlHash2[:]...)
 	glHashout, err := GetGoldilockPoseidonHashByGl(glPreimage)
 	if err != nil {
 		return nil, poseidon.GoldilocksHashOut{}, err
