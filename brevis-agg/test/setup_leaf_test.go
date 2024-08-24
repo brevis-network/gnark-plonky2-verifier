@@ -25,13 +25,13 @@ func TestSetupMiddleHashNode(t *testing.T) {
 	log.Infof("mimcHash: %v", mimcHash)
 	log.Infof("glHash: %v", glHash)
 
-	err = utils.WriteProofIntoLocalFile(subProof1, "./setup_data/leaf_1296_16_receipt.proof")
+	err = utils.WriteProofIntoLocalFile(subProof1, "./setup_data/leaf_hash.proof")
 	assert.NoError(err)
-	err = utils.WriteVerifyingKey(subVk1, "./setup_data/leaf_1296_16_receipt.vk")
+	err = utils.WriteVerifyingKey(subVk1, "./setup_data/leaf_hash.vk")
 	assert.NoError(err)
-	err = utils.WriteWitness("./setup_data/leaf_1296_16_receipt.witness", subWitness1)
+	err = utils.WriteWitness("./setup_data/leaf_hash.witness", subWitness1)
 	assert.NoError(err)
 
-	utils.WriteCcs(ccs, "./setup_data/leaf_1296_16_receipt.ccs")
-	utils.WriteProvingKey(subProofPk1, "./setup_data/leaf_1296_16_receipt.pk")
+	utils.WriteCcs(ccs, "./setup_data/leaf_hash.ccs")
+	utils.WriteProvingKey(subProofPk1, "./setup_data/leaf_hash.pk")
 }

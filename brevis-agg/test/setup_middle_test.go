@@ -102,15 +102,15 @@ func TestSetupLeafHashNode(t *testing.T) {
 	err = groth16.Verify(proof, vk, pubWitness, regroth16.GetNativeVerifierOptions(ecc.BN254.ScalarField(), ecc.BN254.ScalarField()))
 	assert.NoError(err)
 
-	err = utils.WriteProofIntoLocalFile(proof, "./setup_data/middle_one_leaf.proof")
+	err = utils.WriteProofIntoLocalFile(proof, "./setup_data/middle_hash.proof")
 	assert.NoError(err)
-	err = utils.WriteVerifyingKey(vk, "./setup_data/middle_one_leaf.vk")
+	err = utils.WriteVerifyingKey(vk, "./setup_data/middle_hash.vk")
 	assert.NoError(err)
-	err = utils.WriteWitness("./setup_data/middle_one_leaf.witness", pubWitness)
+	err = utils.WriteWitness("./setup_data/middle_hash.witness", pubWitness)
 	assert.NoError(err)
 
-	utils.WriteCcs(ccs, "./setup_data/middle_one_leaf.ccs")
-	utils.WriteProvingKey(pk, "./setup_data/middle_one_leaf.pk")
+	utils.WriteCcs(ccs, "./setup_data/middle_hash.ccs")
+	utils.WriteProvingKey(pk, "./setup_data/middle_hash.pk")
 }
 
 func TestDecodeHashFromWitness(t *testing.T) {
