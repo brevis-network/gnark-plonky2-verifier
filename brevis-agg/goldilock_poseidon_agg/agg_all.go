@@ -182,7 +182,7 @@ func NewAggAllCircuitAssigment(
 	assigment.CustomInnerWitness, err = replonk.ValueOfWitness[sw_bn254.ScalarField](customWitness)
 
 	assigment.CommitHash = commitHash
-	assigment.SmtRoot = assigment
+	assigment.SmtRoot = smtRoot
 	assigment.AppCommitHash[0] = appCommitHash[0]
 	assigment.AppCommitHash[1] = appCommitHash[1]
 	assigment.AppVkHash = appVkHash
