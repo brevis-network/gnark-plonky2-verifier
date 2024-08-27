@@ -243,17 +243,6 @@ func TestVerifyAllInAgg(t *testing.T) {
 	assert.NoError(err)
 	log.Infof("get middle2 done")
 
-	/*var data []uint64
-	for i := 0; i < 30; i++ {
-		data = append(data, 2178309)
-	}
-	leafMimcHash, leafGlHash := GetLeafMimcGlHash(assert, data)
-	subMimcHash1, subGlHash1 := GetNextMimcGlHash(assert, leafMimcHash, leafGlHash)
-	circuitMimcHash, _ := GetNextMimcGlHash(assert, subMimcHash1, subGlHash1)*/
-
-	//log.Infof("subMimcHash1: %v", subMimcHash1)
-	//log.Infof("circuitMimcHash: %v", circuitMimcHash)
-
 	vkPlaceholder1, proofPlaceholder1, witnessPlaceholder1 := goldilock_poseidon_agg.GetMiddleNodeCircuitCcsPlaceHolder()
 
 	circuitVk1, err := regroth16.ValueOfVerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](subVk1)

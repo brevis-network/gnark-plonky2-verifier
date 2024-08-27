@@ -7,6 +7,7 @@ import (
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"testing"
+	"time"
 )
 
 func TestGoldilockPoseidon(t *testing.T) {
@@ -32,13 +33,29 @@ func TestGoldilockPoseidon(t *testing.T) {
 func TestGetOneGoldilockPoseidonHash(t *testing.T) {
 	assert := test.NewAssert(t)
 	var data []uint64
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 1296; i++ {
 		data = append(data, 2178309)
 	}
 
+	for i := 0; i < 10; i++ {
+		start := time.Now()
+		res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(data)
+		assert.NoError(err)
+		log.Infof("res: %v, dur: %d ms", res, time.Until(start).Milliseconds())
+	}
+}
+
+func TestGetOneGoldilockPoseidonHash3(t *testing.T) {
+	assert := test.NewAssert(t)
+	var data []uint64
+	for i := 0; i < 1296; i++ {
+		data = append(data, 0)
+	}
+
+	start := time.Now()
 	res, err := goldilock_poseidon_agg.GetGoldilockPoseidonHashByUint64(data)
 	assert.NoError(err)
-	log.Infof("res: %v", res)
+	log.Infof("res: %v, dur: %d ms", res, time.Until(start).Milliseconds())
 }
 
 func TestGetOneGoldilockPoseidonHash2(t *testing.T) {

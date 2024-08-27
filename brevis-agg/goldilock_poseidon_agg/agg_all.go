@@ -43,8 +43,18 @@ type AggAllCircuit struct {
 func (c *AggAllCircuit) Define(api frontend.API) error {
 	api.AssertIsEqual(c.CommitHash, 0)
 	api.AssertIsEqual(c.SmtRoot, 0)
-	api.AssertIsEqual(c.AppCommitHash, 0)
+	api.AssertIsEqual(c.AppCommitHash[0], 0)
+	api.AssertIsEqual(c.AppCommitHash[1], 0)
 	api.AssertIsEqual(c.AppVkHash, 0)
+
+	poseidonGlChip := poseidon.NewGoldilocksChip(api)
+	var placeholder []gl.Variable
+	for i := 0; i < 30; i++ {
+		placeholder = append(placeholder, gl.NewVariable(100))
+	}
+	for i := 0; i < 4; i++ {
+		poseidonGlChip.HashNoPad(placeholder)
+	}
 
 	if err := c.AssertHashToHashGroth16proof(api); err != nil {
 		return err
