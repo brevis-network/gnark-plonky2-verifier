@@ -5,9 +5,11 @@ import (
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/scs"
+	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gnark/test"
 	"github.com/succinctlabs/gnark-plonky2-verifier/brevis-agg/goldilock_poseidon_agg"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
+	"math/big"
 	"testing"
 	"time"
 )
@@ -92,6 +94,23 @@ func TestGetOneGoldilockPoseidonHash4(t *testing.T) {
 	log.Infof("res: %v", res)
 }
 
+type MimcTestCircuit struct {
+	RawData []frontend.Variable `gnark:",public"`
+}
+
+func (c *MimcTestCircuit) Define(api frontend.API) error {
+	hasher, err := mimc.NewMiMC(api)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(c.RawData); i++ {
+		hasher.Write(c.RawData[i])
+	}
+	x := hasher.Sum()
+	api.AssertIsDifferent(0, x)
+	return nil
+}
+
 func TestGlHashConstraints(t *testing.T) {
 	assert := test.NewAssert(t)
 	circuit := &goldilock_poseidon_agg.GoldilockPoseidonDryRunCircuit{
@@ -105,6 +124,29 @@ func TestGlHashConstraints(t *testing.T) {
 	for i := 0; i < 30; i++ {
 		circuit.RawData = append(circuit.RawData, gl.NewVariable(2178309))
 		assigment.RawData = append(circuit.RawData, gl.NewVariable(2178309))
+	}
+
+	err := test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
+	assert.NoError(err)
+
+	ccs, err := frontend.Compile(ecc.BN254.ScalarField(), scs.NewBuilder, circuit)
+	assert.NoError(err)
+	log.Infof("constrains: %d", ccs.GetNbConstraints())
+}
+
+func TestMimcHash(t *testing.T) {
+	assert := test.NewAssert(t)
+	circuit := &MimcTestCircuit{
+		RawData: []frontend.Variable{},
+	}
+
+	assigment := &MimcTestCircuit{
+		RawData: []frontend.Variable{},
+	}
+
+	for i := 0; i < 30; i++ {
+		circuit.RawData = append(circuit.RawData, new(big.Int).SetUint64(2178309))
+		assigment.RawData = append(circuit.RawData, new(big.Int).SetUint64(2178309))
 	}
 
 	err := test.IsSolved(circuit, assigment, ecc.BN254.ScalarField())
