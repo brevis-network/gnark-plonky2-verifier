@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/brevis-network/brevis-sdk v0.0.0-20240821025939-d024e930f251
-	github.com/consensys/gnark v0.9.1
+	github.com/consensys/gnark v0.9.2-0.20231206193932-4199bb354d89
 	github.com/consensys/gnark-crypto v0.12.2-0.20240215234832-d72fcb379d3e
 	github.com/consensys/gnark-ignition-verifier v0.0.0-20230527014722-10693546ab33
 	github.com/ethereum/go-ethereum v1.13.15
@@ -42,6 +42,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect
+	github.com/iden3/go-iden3-crypto v0.0.15 // indirect
 	github.com/ingonyama-zk/icicle/v2 v2.0.3 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.5.4 // indirect
@@ -75,7 +76,7 @@ require (
 require (
 	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/brevis-network/zk-utils v0.0.0-20240813134119-ba7dcedc2e42
+	github.com/brevis-network/zk-utils v0.0.0-20240830023703-6574b1dea68d
 	github.com/celer-network/goutils v0.1.60
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -94,8 +95,11 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
+	github.com/liyue201/gnark-circomlib v0.0.0
 )
 
-replace github.com/consensys/gnark => github.com/celer-network/gnark v0.1.1-0.20240819072344-611a1f50d4c2
-
-replace github.com/ethereum/go-ethereum v1.13.15 => github.com/ethereum/go-ethereum v1.13.8
+replace (
+	github.com/consensys/gnark => github.com/celer-network/gnark v0.1.1-0.20240819072344-611a1f50d4c2
+	github.com/ethereum/go-ethereum v1.13.15 => github.com/ethereum/go-ethereum v1.13.8
+	github.com/liyue201/gnark-circomlib => github.com/celer-network/gnark-circomlib v0.0.0-20231207061220-de21415c34f7
+)

@@ -2,11 +2,12 @@ package goldilock_poseidon_agg
 
 import (
 	"github.com/brevis-network/brevis-sdk/sdk"
+	poseidon_c_bn254 "github.com/brevis-network/zk-utils/circuits/gadgets/poseidon"
+	"github.com/brevis-network/zk-utils/common/utils"
 	"github.com/celer-network/goutils/log"
 	mimc_bn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
-	"github.com/consensys/gnark/std/hash/mimc"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	"github.com/ethereum/go-ethereum/common"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
@@ -16,9 +17,11 @@ import (
 
 type LeafHashCircuit struct {
 	RawData [LeafRawPubGlCount]gl.Variable
+	Toggles [LeafRawPubGlCount]frontend.Variable
 
-	MimcHash         frontend.Variable          `gnark:",public"`
+	CommitmentHash   frontend.Variable          `gnark:",public"`
 	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"`
+	TogglesHash      frontend.Variable          `gnark:",public"`
 }
 
 func (c *LeafHashCircuit) Define(api frontend.API) error {
@@ -33,7 +36,7 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 
 	// use
 	receipts := BuildReceiptFromGlData(api, c.RawData)
-	mimcHasher, err := mimc.NewMiMC(api)
+	pHasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
 	if err != nil {
 		return err
 	}
@@ -44,9 +47,11 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 		for _, p := range packed {
 			log.Infof("in circuit hash: %x", p)
 		}*/
-		mimcHasher.Write(packed...)
-		sum := mimcHasher.Sum()
-		mimcHasher.Reset()
+		for i := 0; i < len(packed); i++ {
+			pHasher.Write(packed[i])
+		}
+		sum := pHasher.Sum()
+		pHasher.Reset()
 		//log.Infof("in circuit receipt commitments %d: %x", x, sum)
 		inputCommits[x] = sum
 	}
@@ -58,14 +63,28 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 
 	//log.Infof("inputCommitmentsRoot: %x", inputCommitmentsRoot)
 
-	api.AssertIsEqual(inputCommitmentsRoot, c.MimcHash)
+	api.AssertIsEqual(inputCommitmentsRoot, c.CommitmentHash)
 	//log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
 
 	return nil
 }
 
+func calTogglesCommitment(api frontend.API, toggles []frontend.Variable) (frontend.Variable, error) {
+	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
+	if err != nil {
+		return nil, err
+	}
+
+	tc := utils.PackBitsToFr(api, toggles)
+	for i := 0; i < len(tc); i++ {
+		hasher.Write(tc[i])
+	}
+	sum := hasher.Sum()
+	return sum, nil
+}
+
 func calMerkelRoot(api frontend.API, commitHash [MaxReceiptPerLeaf]frontend.Variable) (frontend.Variable, error) {
-	hasher, err := mimc.NewMiMC(api)
+	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
 	if err != nil {
 		return nil, err
 	}
