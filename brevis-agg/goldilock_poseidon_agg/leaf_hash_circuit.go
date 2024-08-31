@@ -26,15 +26,23 @@ type LeafHashCircuit struct {
 
 func (c *LeafHashCircuit) Define(api frontend.API) error {
 	// do goldilock hash
-	glAPI := gl.New(api)
-	poseidonGlChip := poseidon.NewGoldilocksChip(api)
-	output := poseidonGlChip.HashNoPad(c.RawData[:])
-	// Check that output is correct
-	for i := 0; i < 4; i++ {
-		glAPI.AssertIsEqual(output[i], c.GoldilockHashOut[i])
-	}
+	c.checkGlPoseidonHash(api)
 
 	// use
+	err := c.checkSdkCommitments(api)
+	if err != nil {
+		return err
+	}
+
+	err = c.checkTogglesCommitment(api)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *LeafHashCircuit) checkSdkCommitments(api frontend.API) error {
 	receipts := BuildReceiptFromGlData(api, c.RawData)
 	pHasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
 	if err != nil {
@@ -43,56 +51,55 @@ func (c *LeafHashCircuit) Define(api frontend.API) error {
 	var inputCommits [MaxReceiptPerLeaf]frontend.Variable
 	for x, receipt := range receipts {
 		packed := receipt.Pack(api)
-		/*log.Infof("in circuit hash %d", x)
-		for _, p := range packed {
-			log.Infof("in circuit hash: %x", p)
-		}*/
 		for i := 0; i < len(packed); i++ {
 			pHasher.Write(packed[i])
 		}
 		sum := pHasher.Sum()
 		pHasher.Reset()
-		//log.Infof("in circuit receipt commitments %d: %x", x, sum)
 		inputCommits[x] = sum
 	}
 
-	inputCommitmentsRoot, err := calMerkelRoot(api, inputCommits)
+	return c.checkLeafMerkelRoot(api, inputCommits)
+}
+
+func (c *LeafHashCircuit) checkGlPoseidonHash(api frontend.API) {
+	// do goldilock hash
+	// if less than 130 gl, should pad
+	glAPI := gl.New(api)
+	poseidonGlChip := poseidon.NewGoldilocksChip(api)
+	output := poseidonGlChip.HashNoPad(c.RawData[:])
+	// Check that output is correct
+	for i := 0; i < 4; i++ {
+		glAPI.AssertIsEqual(output[i], c.GoldilockHashOut[i])
+	}
+}
+
+func (c *LeafHashCircuit) checkTogglesCommitment(api frontend.API) error {
+	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
 	if err != nil {
 		return err
 	}
 
-	//log.Infof("inputCommitmentsRoot: %x", inputCommitmentsRoot)
-
-	api.AssertIsEqual(inputCommitmentsRoot, c.CommitmentHash)
-	//log.Infof("c.MimcHash: %x, mimcHashOutput: %x", c.MimcHash, mimcHashOutput)
-
-	return nil
-}
-
-func calTogglesCommitment(api frontend.API, toggles []frontend.Variable) (frontend.Variable, error) {
-	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
-	if err != nil {
-		return nil, err
-	}
-
-	tc := utils.PackBitsToFr(api, toggles)
+	tc := utils.PackBitsToFr(api, c.Toggles[:])
 	for i := 0; i < len(tc); i++ {
 		hasher.Write(tc[i])
 	}
 	sum := hasher.Sum()
-	return sum, nil
+	api.AssertIsEqual(c.TogglesHash, sum)
+	return err
 }
 
-func calMerkelRoot(api frontend.API, commitHash [MaxReceiptPerLeaf]frontend.Variable) (frontend.Variable, error) {
+func (c *LeafHashCircuit) checkLeafMerkelRoot(api frontend.API, commitHash [MaxReceiptPerLeaf]frontend.Variable) error {
 	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	elementCount := MaxReceiptPerLeaf
 	for {
 		if elementCount == 1 {
 			log.Infof("in circuitnputCommitmentsRoot: %x", commitHash[0])
-			return commitHash[0], nil
+			api.AssertIsEqual(commitHash[0], c.CommitmentHash)
+			return nil
 		}
 		log.Infof("calMerkelRoot with element size: %d", elementCount)
 		for i := 0; i < elementCount/2; i++ {

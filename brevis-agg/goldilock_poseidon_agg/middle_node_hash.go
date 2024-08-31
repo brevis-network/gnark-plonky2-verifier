@@ -1,11 +1,10 @@
 package goldilock_poseidon_agg
 
 import (
-	"fmt"
+	poseidon_c_bn254 "github.com/brevis-network/zk-utils/circuits/gadgets/poseidon"
 	mimc_bn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_bn254"
-	"github.com/consensys/gnark/std/hash/mimc"
 	regroth16 "github.com/consensys/gnark/std/recursion/groth16"
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 	"github.com/succinctlabs/gnark-plonky2-verifier/poseidon"
@@ -16,11 +15,13 @@ const MiddleNodeAggSize = 2
 
 // normal, 2 to 1
 type MiddleNodeHashCircuit struct {
-	PreMimcHash         [MiddleNodeAggSize]frontend.Variable
+	PreCommitmentHash   [MiddleNodeAggSize]frontend.Variable
 	PreGoldilockHashOut [MiddleNodeAggSize]poseidon.GoldilocksHashOut
+	PreToggleHash       [MiddleNodeAggSize]frontend.Variable
 
-	MimcHash         frontend.Variable          `gnark:",public"`
+	CommitmentHash   frontend.Variable          `gnark:",public"`
 	GoldilockHashOut poseidon.GoldilocksHashOut `gnark:",public"`
+	ToggleHash       frontend.Variable          `gnark:",public"`
 
 	Proof        [MiddleNodeAggSize]regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine]
 	VerifyingKey [MiddleNodeAggSize]regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl]
@@ -28,6 +29,63 @@ type MiddleNodeHashCircuit struct {
 }
 
 func (c *MiddleNodeHashCircuit) Define(api frontend.API) error {
+	err := c.checkSdkCommitment(api)
+	if err != nil {
+		return err
+	}
+	c.checkGlHash(api)
+	err = c.checkSdkToggles(api)
+	if err != nil {
+		return err
+	}
+	err = c.VerifyInnerProof(api)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *MiddleNodeHashCircuit) VerifyInnerProof(api frontend.API) error {
+	verifier, err := regroth16.NewVerifier[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](api)
+	if err != nil {
+		return err
+	}
+
+	err = verifier.BatchAssertProofBrevis(c.VerifyingKey[:], c.Proof[:], c.InnerWitness[:])
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *MiddleNodeHashCircuit) checkSdkToggles(api frontend.API) error {
+	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
+	if err != nil {
+		return err
+	}
+
+	hasher.Write(c.PreToggleHash[0])
+	hasher.Write(c.PreToggleHash[1])
+	sum := hasher.Sum()
+	api.AssertIsEqual(sum, c.ToggleHash)
+	return nil
+}
+
+func (c *MiddleNodeHashCircuit) checkSdkCommitment(api frontend.API) error {
+	hasher, err := poseidon_c_bn254.NewBn254PoseidonCircuit(api)
+	if err != nil {
+		return err
+	}
+
+	hasher.Write(c.PreCommitmentHash[0])
+	hasher.Write(c.PreCommitmentHash[1])
+	sum := hasher.Sum()
+	api.AssertIsEqual(sum, c.CommitmentHash)
+	return nil
+}
+
+func (c *MiddleNodeHashCircuit) checkGlHash(api frontend.API) {
 	glAPI := gl.New(api)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	var goldilockPreImage []gl.Variable
@@ -47,45 +105,12 @@ func (c *MiddleNodeHashCircuit) Define(api frontend.API) error {
 		poseidonGlChip.HashNoPad(placeholder)
 	}
 
-	mimcHasher, err := mimc.NewMiMC(api)
-	if err != nil {
-		return err
-	}
-
-	mimcHasher.Write(c.PreMimcHash[0])
-	mimcHasher.Write(c.PreMimcHash[1])
-	mimcOutput := mimcHasher.Sum()
-	api.AssertIsEqual(mimcOutput, c.MimcHash)
-
 	for x, cm := range c.InnerWitness {
-		h0 := cm.Public[0].Limbs[3]
-		h1 := cm.Public[0].Limbs[2]
-		h2 := cm.Public[0].Limbs[1]
-		h3 := cm.Public[0].Limbs[0]
-
-		h0 = api.Mul(h0, big.NewInt(1).Lsh(big.NewInt(1), 192))
-		h1 = api.Mul(h1, big.NewInt(1).Lsh(big.NewInt(1), 128))
-		h2 = api.Mul(h2, big.NewInt(1).Lsh(big.NewInt(1), 64))
-		res := api.Add(h0, h1, h2, h3)
-		api.AssertIsEqual(res, c.PreMimcHash[x])
-
 		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[1].Limbs[0]), c.PreGoldilockHashOut[x][0])
 		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[2].Limbs[0]), c.PreGoldilockHashOut[x][1])
 		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[3].Limbs[0]), c.PreGoldilockHashOut[x][2])
 		glAPI.AssertIsEqual(gl.NewVariable(cm.Public[4].Limbs[0]), c.PreGoldilockHashOut[x][3])
 	}
-
-	verifier, err := regroth16.NewVerifier[sw_bn254.ScalarField, sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl](api)
-	if err != nil {
-		return fmt.Errorf("new verifier: %w", err)
-	}
-
-	err = verifier.BatchAssertProofBrevis(c.VerifyingKey[:], c.Proof[:], c.InnerWitness[:])
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetMiddleNodeCircuitCcsPlaceHolder() (regroth16.VerifyingKey[sw_bn254.G1Affine, sw_bn254.G2Affine, sw_bn254.GTEl], regroth16.Proof[sw_bn254.G1Affine, sw_bn254.G2Affine], regroth16.Witness[sw_bn254.ScalarField]) {
