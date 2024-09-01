@@ -56,7 +56,8 @@ func (c *LeafHashCircuit) checkSdkCommitments(api frontend.API) error {
 		}
 		sum := pHasher.Sum()
 		pHasher.Reset()
-		inputCommits[x] = sum
+
+		inputCommits[x] = api.Select(c.Toggles[x], sum, 0)
 	}
 
 	return c.checkLeafMerkelRoot(api, inputCommits)
