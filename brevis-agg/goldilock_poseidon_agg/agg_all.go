@@ -47,15 +47,6 @@ func (c *AggAllCircuit) Define(api frontend.API) error {
 	api.AssertIsEqual(c.AppCommitHash[1], 0)
 	api.AssertIsEqual(c.AppVkHash, 0)
 
-	poseidonGlChip := poseidon.NewGoldilocksChip(api)
-	var placeholder []gl.Variable
-	for i := 0; i < 30; i++ {
-		placeholder = append(placeholder, gl.NewVariable(100))
-	}
-	for i := 0; i < 4; i++ {
-		poseidonGlChip.HashNoPad(placeholder)
-	}
-
 	if err := c.AssertHashToHashGroth16proof(api); err != nil {
 		return err
 	}
@@ -69,7 +60,22 @@ func (c *AggAllCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func (c *AggAllCircuit) AssertMimcHash(api frontend.API) {
+func (c *AggAllCircuit) AssertTogglesHash(api frontend.API) {
+	h0 := c.HashInnerWitness.Public[5].Limbs[3]
+	h1 := c.HashInnerWitness.Public[5].Limbs[2]
+	h2 := c.HashInnerWitness.Public[5].Limbs[1]
+	h3 := c.HashInnerWitness.Public[5].Limbs[0]
+
+	h0 = api.Mul(h0, big.NewInt(1).Lsh(big.NewInt(1), 192))
+	h1 = api.Mul(h1, big.NewInt(1).Lsh(big.NewInt(1), 128))
+	h2 = api.Mul(h2, big.NewInt(1).Lsh(big.NewInt(1), 64))
+	res := api.Add(h0, h1, h2, h3)
+
+	// TODO check
+	api.AssertIsEqual(res, c.CustomInnerWitness.Public[1].Limbs[0])
+}
+
+func (c *AggAllCircuit) AssertBn254PoseidonHash(api frontend.API) {
 	h0 := c.HashInnerWitness.Public[0].Limbs[3]
 	h1 := c.HashInnerWitness.Public[0].Limbs[2]
 	h2 := c.HashInnerWitness.Public[0].Limbs[1]
