@@ -14,11 +14,10 @@ func TestStepVerifier(t *testing.T) {
 	assert := test.NewAssert(t)
 
 	testCase := func() {
-		plonky2Circuit := "step"
-		commonCircuitData := types.ReadCommonCircuitData("../testdata/" + plonky2Circuit + "/common_circuit_data.json")
+		commonCircuitData := types.ReadCommonCircuitData("./data/common_circuit_data.json")
 
-		proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("../testdata/" + plonky2Circuit + "/proof_with_public_inputs.json"))
-		verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData("../testdata/" + plonky2Circuit + "/verifier_only_circuit_data.json"))
+		proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("./data/proof_with_public_inputs.json"))
+		verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData("./data/verifier_only_circuit_data.json"))
 
 		circuit := verifier.ExampleVerifierCircuit{
 			Proof:                   proofWithPis.Proof,

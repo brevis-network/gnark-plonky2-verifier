@@ -127,8 +127,12 @@ func (p *PlonkChip) evalVanishingPoly(
 	glApi := gl.New(p.api)
 	constraintTerms := p.evaluateGatesChip.EvaluateGateConstraints(vars)
 
+	//log.Infof("constraintTerms: %+v", constraintTerms)
+
 	// Calculate the k[i] * x
 	sIDs := make([]gl.QuadraticExtensionVariable, p.commonData.Config.NumRoutedWires)
+
+	//log.Infof("sIDs: %+v", sIDs)
 
 	for i := uint64(0); i < p.commonData.Config.NumRoutedWires; i++ {
 		sIDs[i] = glApi.ScalarMulExtension(proofChallenges.PlonkZeta, p.commonDataKIs[i])
@@ -137,6 +141,8 @@ func (p *PlonkChip) evalVanishingPoly(
 	// Calculate L_0(zeta)
 	l0Zeta := p.evalL0(proofChallenges.PlonkZeta, zetaPowN)
 
+	//log.Infof("l0Zeta: %+v", l0Zeta)
+
 	vanishingZ1Terms := make([]gl.QuadraticExtensionVariable, 0, p.commonData.Config.NumChallenges)
 	vanishingPartialProductsTerms := make([]gl.QuadraticExtensionVariable, 0, p.commonData.Config.NumChallenges*p.commonData.NumPartialProducts)
 	for i := uint64(0); i < p.commonData.Config.NumChallenges; i++ {
@@ -144,6 +150,9 @@ func (p *PlonkChip) evalVanishingPoly(
 		z1_term := glApi.MulExtension(
 			l0Zeta,
 			glApi.SubExtension(openings.PlonkZs[i], gl.OneExtension()))
+
+		//log.Infof("z1_term %d %+v", i, z1_term)
+
 		vanishingZ1Terms = append(vanishingZ1Terms, z1_term)
 
 		numeratorValues := make([]gl.QuadraticExtensionVariable, 0, p.commonData.Config.NumRoutedWires)
@@ -176,11 +185,17 @@ func (p *PlonkChip) evalVanishingPoly(
 			denominatorValues = append(denominatorValues, denominator)
 		}
 
+		//log.Infof("numeratorValues %d   %+v", i, numeratorValues)
+
+		//log.Infof("denominatorValues %d  %+v", i, denominatorValues)
+
 		vanishingPartialProductsTerms = append(
 			vanishingPartialProductsTerms,
 			p.checkPartialProducts(numeratorValues, denominatorValues, i, openings)...,
 		)
 	}
+
+	//log.Infof("vanishingPartialProductsTerms: %+v", vanishingPartialProductsTerms)
 
 	vanishingTerms := append(vanishingZ1Terms, vanishingPartialProductsTerms...)
 	vanishingTerms = append(vanishingTerms, constraintTerms...)
@@ -189,6 +204,12 @@ func (p *PlonkChip) evalVanishingPoly(
 	for i := uint64(0); i < p.commonData.Config.NumChallenges; i++ {
 		reducedValues[i] = gl.ZeroExtension()
 	}
+
+	//log.Infof("reducedValues: %+v", reducedValues)
+
+	//log.Infof("p.commonData.Config.NumChallenges: %+d", p.commonData.Config.NumChallenges)
+	//log.Infof("proofChallenges.PlonkAlphas: %+v", proofChallenges.PlonkAlphas)
+	//log.Infof("vanishingTerms: %+v", vanishingTerms)
 
 	// reverse iterate the vanishingPartialProductsTerms array
 	for i := len(vanishingTerms) - 1; i >= 0; i-- {
@@ -224,7 +245,14 @@ func (p *PlonkChip) Verify(
 		publicInputsHash,
 	)
 
+	//log.Infof("vars: %+v", *vars)
+	//log.Infof("proofChallenges: %+v", proofChallenges)
+	//log.Infof("openings: %+v", openings)
+	//log.Infof("zetaPowN: %+v", zetaPowN)
+
 	vanishingPolysZeta := p.evalVanishingPoly(*vars, proofChallenges, openings, zetaPowN)
+
+	//log.Infof("vanishingPolysZeta: %+v", vanishingPolysZeta)
 
 	// Calculate Z(H)
 	zHZeta := glApi.SubExtension(zetaPowN, gl.OneExtension())
@@ -244,6 +272,10 @@ func (p *PlonkChip) Verify(
 				zetaPowN,
 			),
 		)
+
+		//log.Infof("vanishingPolysZeta[i]: %d %+v", i, vanishingPolysZeta[i])
+
+		//log.Infof("prod: %d %+v", i, prod)
 
 		glApi.AssertIsEqualExtension(vanishingPolysZeta[i], prod)
 	}
